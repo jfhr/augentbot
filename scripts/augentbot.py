@@ -80,9 +80,11 @@ def process_new_tweets():
         new_tweets = api.home_timeline(count=200, page=p)
 
         # limit this process to a maximum number of pages
-        if p == 12:
+        if p == 25:
             log_info('Reached limit of tweets to process.')
             data_file.close()
+            last_id_file.write(new_tweets[0].id)
+            last_id_file.close()
             return
 
         # skip tweets that aren't older than two days
