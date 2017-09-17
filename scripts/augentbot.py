@@ -9,13 +9,13 @@ from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
 from tweet_text import make_tweet, get_plain, viable, get_weight
 from timestamps import read_wo_timestamps, add_timestamp
 
-TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot_beta', 'credentials',
                                          'twitter_consumer_key')).read()
-TWITTER_CONSUMER_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_CONSUMER_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot_beta', 'credentials',
                                             'twitter_consumer_secret')).read()
-TWITTER_ACCESS_TOKEN = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_ACCESS_TOKEN = open(os.path.join(os.path.expanduser('~'), 'augentbot_beta', 'credentials',
                                          'twitter_access_token')).read()
-TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot_beta', 'credentials',
                                                 'twitter_access_token_secret')).read()
 
 HOST_NAME = '_jfde'
