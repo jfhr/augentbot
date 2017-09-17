@@ -54,9 +54,10 @@ def log_info(entry, notify=False):
         notify_me(entry)
 
 
-def add_data(entry):
-    with open(os.path.join('..', 'data', 'data.txt'), 'a') as file:
-        file.write(add_timestamp(entry))
+def add_data(entry, weight=1):
+    for i in range(weight):
+        with open(os.path.join('..', 'data', 'data.txt'), 'a') as file:
+            file.write(add_timestamp(entry))
 
 
 def process_new_tweets():
@@ -73,12 +74,14 @@ def process_new_tweets():
     with open(os.path.join('..', 'data', '_lastid.txt')) as file:
         last_id = int(file.read())
 
-    data_file = open(os.path.join('..', 'data', '_lastid.txt'), 'w')
+    last_id_file = open(os.path.join('..', 'data', '_lastid.txt'), 'w')
+    data_file = open(os.path.join('..', 'data', 'data.txt'), 'a')
+
     while True:
         new_tweets = api.home_timeline(count=200, page=p)
 
         # limit this process to a maximum number of pages
-        if p == 1:
+        if p == 12:
             log_info('Reached limit of tweets to process.')
             data_file.close()
             return
@@ -95,8 +98,7 @@ def process_new_tweets():
             else:
                 if viable(t):
                     log_info("Processing tweet '{0}' ... viable".format(get_plain(t.text)))
-                    for i in range(get_weight(t)):
-                        add_data(get_plain(t.text))
+                    add_data(get_plain(t.text), get_weight(t))
                 else:
                     log_info("Processing tweet '{0}' ... not viable".format(get_plain(t.text)))
 
@@ -160,7 +162,8 @@ def add_tweets_interactive():
 
 
 if __name__ == '__main__':
-    # process_new_tweets()
+    # https://twitter.com/_jfde/status/907873870648094720
+    process_new_tweets()
     add_tweets_interactive()
 
     os.system('git push')
