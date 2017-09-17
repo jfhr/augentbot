@@ -160,7 +160,6 @@ def add_tweets_interactive():
 
 
 if __name__ == '__main__':
-    # https://twitter.com/_jfde/status/907873870648094720
     process_new_tweets()
     add_tweets_interactive()
 
