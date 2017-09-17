@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="50978ed2-6235-48a3-8217-e542326b07ab" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/augentbot.py" afterPath="$PROJECT_DIR$/scripts/augentbot.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,15 +17,14 @@
       <file leaf-file-name="augentbot.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/augentbot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="799">
-              <caret line="160" column="0" lean-forward="true" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+            <state relative-caret-position="425">
+              <caret line="25" column="22" lean-forward="true" selection-start-line="25" selection-start-column="22" selection-end-line="25" selection-end-column="22" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <element signature="e#1186#1637#0" expanded="false" />
-                <element signature="e#1679#2211#0" expanded="false" />
-                <element signature="e#2239#2343#0" expanded="false" />
-                <element signature="e#2376#4113#0" expanded="false" />
-                <element signature="e#4150#4747#0" expanded="false" />
+                <element signature="e#12#21#0" expanded="true" />
+                <element signature="e#1198#1649#0" expanded="false" />
+                <element signature="e#1691#2223#0" expanded="false" />
+                <element signature="e#2251#2355#0" expanded="false" />
+                <element signature="e#2388#4125#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -62,16 +62,15 @@
         <option value="$PROJECT_DIR$/scripts/timestamps.py" />
         <option value="$PROJECT_DIR$/data/log.txt" />
         <option value="$PROJECT_DIR$/scripts/tweet_text.py" />
-        <option value="$PROJECT_DIR$/scripts/augentbot.py" />
         <option value="$PROJECT_DIR$/tweets/7.txt" />
+        <option value="$PROJECT_DIR$/scripts/augentbot.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="54" />
-    <option name="y" value="-8" />
-    <option name="width" value="1874" />
-    <option name="height" value="1092" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="984" />
+    <option name="width" value="943" />
+    <option name="height" value="1087" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -184,12 +183,13 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
+    <frame x="984" y="0" width="943" height="1087" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12378902" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24811219" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37459633" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -271,7 +271,7 @@
         <state relative-caret-position="499">
           <caret line="40" column="4" lean-forward="true" selection-start-line="40" selection-start-column="4" selection-end-line="40" selection-end-column="13" />
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#0#21#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -302,15 +302,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/augentbot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="799">
-          <caret line="160" column="0" lean-forward="true" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+        <state relative-caret-position="425">
+          <caret line="25" column="22" lean-forward="true" selection-start-line="25" selection-start-column="22" selection-end-line="25" selection-end-column="22" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#1186#1637#0" expanded="false" />
-            <element signature="e#1679#2211#0" expanded="false" />
-            <element signature="e#2239#2343#0" expanded="false" />
-            <element signature="e#2376#4113#0" expanded="false" />
-            <element signature="e#4150#4747#0" expanded="false" />
+            <element signature="e#12#21#0" expanded="true" />
+            <element signature="e#1198#1649#0" expanded="false" />
+            <element signature="e#1691#2223#0" expanded="false" />
+            <element signature="e#2251#2355#0" expanded="false" />
+            <element signature="e#2388#4125#0" expanded="false" />
           </folding>
         </state>
       </provider>
