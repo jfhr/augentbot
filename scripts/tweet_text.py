@@ -12,10 +12,15 @@ def grammar_check(text):
 
 
 def get_weight(tweet):
+    r = tweet.retweet_count
+    f = tweet.favorite_count
+    p = tweet.author.followers_count
+
     if tweet.author.screen_name != MY_NAME:
         return round(((tweet.retweet_count*3 + tweet.favorite_count)/tweet.author.followers_count) * 50) + 1
     else:
-        return round(((tweet.retweet_count*3 + tweet.favorite_count)*10/tweet.author.followers_count - 1)) ^ 3 * 10
+        return (r*5 + f)/p
+        return ((tweet.retweet_count*5 + tweet.favorite_count)*10/tweet.author.followers_count) ^ 3 * 10
 
 
 def viable(tweet):

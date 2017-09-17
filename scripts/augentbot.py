@@ -72,7 +72,7 @@ def process_new_tweets():
 
     with open(os.path.join('..', 'data', '_lastid.txt')) as file:
         last_id = int(file.read())
-
+  
     last_id_file = open(os.path.join('..', 'data', '_lastid.txt'), 'w')
     data_file = open(os.path.join('..', 'data', 'data.txt'), 'a')
 
@@ -85,13 +85,16 @@ def process_new_tweets():
             data_file.close()
             return
 
+        # skip tweets that aren't older than two days
         for t in new_tweets:
-            if t.created_at > datetime.datetime.utcnow() - datetime.timedelta(days=2):
+            if t.created_at > datetime.datetime.now() - datetime.timedelta(days=2):
                 continue
 
             elif t.id <= last_id:
                 log_info('All tweets processed')
                 data_file.close()
+                last_id_file.write(t.id)
+                last_id_file.close()
                 return
 
             else:
@@ -100,10 +103,6 @@ def process_new_tweets():
                     add_data(get_plain(t.text), get_weight(t))
                 else:
                     log_info("Processing tweet '{0}' ... not viable".format(get_plain(t.text)))
-
-                if not logged_last_id:
-                    data_file.write(str(t.id))
-                    logged_last_id = True
         p += 1
 
 
