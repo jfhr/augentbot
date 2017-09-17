@@ -146,8 +146,6 @@ def add_tweets_interactive():
     number_tweets = int(input('Number of tweets to produce: '))
     tweets = generate_tweets(number_tweets)
 
-    print('\n'.join(tweets))
-
     with open(os.path.join('..', "tweets", "_nexttweet.txt")) as file:
         next_tweet_id = int(file.read())
 
