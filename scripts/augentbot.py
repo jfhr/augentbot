@@ -153,7 +153,8 @@ def add_tweets_interactive():
 
     with open(os.path.join('..', "tweets", "_nexttweet.txt"), 'w') as file:
         file.write(str(next_tweet_id+number_tweets))
-
+    
+    os.system('git add -A')
     os.system('git commit -a -m "added tweets {} to {}"'.format(next_tweet_id, next_tweet_id+number_tweets-1))
 
 
