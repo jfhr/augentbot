@@ -46,9 +46,8 @@ def log_info(entry, notify=False):
     user specified as HOST_NAME via twitter dm. This requires that the user
     has allowed receiving dms from this account
     """
-    entry = add_timestamp(entry)
     with open(os.path.join('..', "data", "log.txt"), 'a') as file:
-        file.write(entry)
+        file.write(add_timestamp(entry) + '\n')
     print(entry)
     if notify:
         notify_me(entry)
@@ -57,7 +56,7 @@ def log_info(entry, notify=False):
 def add_data(entry, weight=1):
     for i in range(weight):
         with open(os.path.join('..', 'data', 'data.txt'), 'a') as file:
-            file.write(add_timestamp(entry))
+            file.write(add_timestamp(entry) + '\n')
 
 
 def process_new_tweets():
@@ -160,7 +159,7 @@ def add_tweets_interactive():
 
 
 if __name__ == '__main__':
-    # https://twitter.com/_jfde/status/907873870648094720
+    os.system('chcp 65001')
     process_new_tweets()
     add_tweets_interactive()
 
