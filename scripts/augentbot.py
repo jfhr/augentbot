@@ -1,21 +1,110 @@
 import os
+import tweepy
+import datetime
 from pymarkovchain import MarkovChain
 from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
-from tweet_text import make_tweet, get_plain
-from timestamps import read_wo_timestamps
+
+from tweet_text import make_tweet, get_plain, viable, get_weight
+from timestamps import read_wo_timestamps, add_timestamp
+
+TWITTER_CONSUMER_KEY = open(os.path.join('..', r'credentials', 'twitter_consumer_key')).read()
+TWITTER_CONSUMER_SECRET = open(os.path.join('..', r'credentials', 'twitter_consumer_secret')).read()
+TWITTER_ACCESS_TOKEN = open(os.path.join('..', r'credentials', 'twitter_access_token')).read()
+TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join('..', r'credentials', 'twitter_access_token_secret')).read()
+
+HOST_NAME = '_jfde'
+
+auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+
+api = tweepy.API(auth)
+
+
+def notify_me(text):
+    """
+    send a message to the user specified as HOST_NAME. Messages longer than 10000
+    characters will be split in submessages due to twitter limits
+    """
+    for subtext in [text[i:i+10000] for i in range(0, len(text), 10000)]:
+        try:
+            api.send_direct_message(screen_name=HOST_NAME, text=subtext)
+        except tweepy.TweepError as e:
+            log_info("{0} when trying to send the following dm:\n    '{1}'".format(e, text))
+
+
+def log_info(entry, notify=False):
+    """
+    Attaches a timestamp with the current time to the entry,
+    prints the entry and saves it in the log.txt file of the data directory.
+    It notify is true, the entry with the add_timestamp will be sent to the
+    user specified as HOST_NAME via twitter dm. This requires that the user
+    has allowed receiving dms from this account
+    """
+    entry = add_timestamp(entry)
+    with open(os.path.join('..', "data", "log.txt"), 'a') as file:
+        file.write(entry)
+    print(entry)
+    if notify:
+        notify_me(entry)
+
+
+def add_data(entry):
+    with open(os.path.join('..', 'data', 'data.txt'), 'a') as file:
+        file.write(add_timestamp(entry))
+
+
+def process_new_tweets():
+    """
+    Gets new tweets from the augentbot home timeline, checks every tweet for viability, and adds that tweet to
+    the data log. If a tweet has a high weight (many likes and retweets compared to the author's follower count),
+    it is being added more often.
+    Only tweets older than 2 days are being processed. To make sure each tweet isn't being processed more than once,
+    the id of the youngest tweet that has been processed is being stored during every run.
+    """
+    p = 0
+    logged_last_id = False
+
+    with open(os.path.join('..', 'data', '_lastid.txt')) as file:
+        last_id = int(file.read())
+
+    while True:
+        new_tweets = api.home_timeline(count=200, page=p)
+
+        for t in new_tweets:
+            if t.created_at > datetime.datetime.utcnow() - datetime.timedelta(days=2):
+                continue
+
+            elif t.id <= last_id:
+                log_info('All tweets processed')
+                return
+
+            else:
+                if viable(t):
+                    log_info("Processing tweet '{0}' ... viable".format(get_plain(t.text)))
+                    for i in range(get_weight(t)):
+                        add_data(get_plain(t.text))
+                else:
+                    log_info("Processing tweet '{0}' ... not viable".format(get_plain(t.text)))
+
+                if not logged_last_id:
+                    with open(os.path.join('..', 'data', '_lastid.txt'), 'w') as file:
+                        file.write(str(t.id))
+                    logged_last_id = True
+        p += 1
 
 
 def generate_tweets(count=1):
     mc = MarkovChain()
 
-    base_corpus = webtext.raw()
+    base_corpus = ''
+    base_corpus += webtext.raw()
     base_corpus += gutenberg.raw()
     base_corpus += udhr.raw('English-Latin1')
 
     twitter_samples_list = twitter_samples.strings()
     base_corpus += '\n'.join([get_plain(t) for t in twitter_samples_list])
 
-    with open(os.path.join("..", "data", "data.txt")) as file:
+    with open(os.path.join('..', "data", "data.txt")) as file:
         collected_data = '\n'.join(read_wo_timestamps(file.readlines()))
 
     mc.generateDatabase(base_corpus + collected_data)
@@ -27,29 +116,36 @@ def generate_tweets(count=1):
     return tweets
 
 
-if __name__ == '__main__':
-    '''
-    When executed, the script interactively asks for the number of tweets to produce.
+def add_tweets_interactive():
+    """
+    When executed, this method interactively asks for the number of tweets to produce.
     That many tweets are then produced, printed out and saved to text files in the tweets directory.
     Every tweet lives in a separate text file of the form '{n}.txt', where n is a number that identifies the tweet
     internally. After creation, these files are automatically being pushed to github.
     A scheduled process hosted at integromat.com automatically gets one tweet per hour from the github repository
     and tweets it to twitter.com/augentbot. This method allows to create almost arbitrarily many tweets in advance,
-    and tweet them to the right time without the need to operate an own server.    
-    '''
+    and tweet them to the right time without the need to operate an own server.
+    """
     number_tweets = int(input('Number of tweets to produce: '))
     tweets = generate_tweets(number_tweets)
 
     print('\n'.join(tweets))
 
-    with open(os.path.join("..", "tweets", "_nexttweet.txt")) as file:
+    with open(os.path.join('..', "tweets", "_nexttweet.txt")) as file:
         next_tweet_id = int(file.read())
 
     for n in range(next_tweet_id, next_tweet_id+number_tweets):
-        with open(os.path.join("..", "tweets", "{}.txt".format(str(n))), 'w') as tfile:
+        with open(os.path.join('..', "tweets", "{}.txt".format(str(n))), 'w') as tfile:
             tfile.write(tweets[n-next_tweet_id])
 
-    with open(os.path.join("..", "tweets", "_nexttweet.txt"), 'w') as file:
+    with open(os.path.join('..', "tweets", "_nexttweet.txt"), 'w') as file:
         file.write(str(next_tweet_id+number_tweets))
 
-    # TODO: automatically push changes to github
+    os.system('git commit -m "added tweets {} to {}"'.format(next_tweet_id, next_tweet_id+number_tweets))
+
+
+if __name__ == '__main__':
+    process_new_tweets()
+    add_tweets_interactive()
+
+    os.system('git push')

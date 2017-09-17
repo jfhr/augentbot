@@ -3,11 +3,18 @@ import re
 
 BLACKLISTED_WORDS = ['retweet', 'rt ', 'like', 'follo', 'ctl', 'cross the line', 'ifb']
 ALLOWED_CHARS = """abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_@'"-<>?!/\\#., ()\n"""
+MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
 
 
 def grammar_check(text):
     return language_check.correct(text, lt.check(text))
+
+
+def get_weight(tweet):
+    if tweet.author.screen_name != MY_NAME:
+        return round(((tweet.retweet_count*3 + tweet.favorite_count)/tweet.author.followers_count) * 50) + 1
+    else:
 
 
 def viable(tweet):
