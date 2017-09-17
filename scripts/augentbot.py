@@ -122,7 +122,9 @@ def generate_tweets(count=1):
 
     tweets = []
     for i in range(count):
-        tweets.append(make_tweet(mc.generateString()))
+        tweet = make_tweet(mc.generateString())
+        log_info("Added tweet '{}'".format(tweet))
+        tweets.append(tweet)
     
     return tweets
 
