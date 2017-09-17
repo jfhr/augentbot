@@ -1,9 +1,11 @@
+#! python3
+
 import datetime
 
 
 def add_timestamp(entry):
     timestamp = str(tuple(datetime.datetime.utcnow().timetuple())[:6])
-    timestamp = '{0}{1}'.format(' ' * (26 - len(timestamp)), timestamp)
+    timestamp = '{0}{1} '.format(' ' * (25 - len(timestamp)), timestamp)
     return timestamp + entry
 
 

@@ -3,11 +3,19 @@ import re
 
 BLACKLISTED_WORDS = ['retweet', 'rt ', 'like', 'follo', 'ctl', 'cross the line', 'ifb']
 ALLOWED_CHARS = """abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_@'"-<>?!/\\#., ()\n"""
+MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
 
 
 def grammar_check(text):
     return language_check.correct(text, lt.check(text))
+
+
+def get_weight(tweet):
+    if tweet.author.screen_name != MY_NAME:
+        return round(((tweet.retweet_count*3 + tweet.favorite_count)/tweet.author.followers_count) * 50) + 1
+    else:
+        return round(((tweet.retweet_count*3 + tweet.favorite_count)*10/tweet.author.followers_count - 1)) ^ 3 * 10
 
 
 def viable(tweet):
@@ -28,6 +36,7 @@ def get_plain(string):
     string = re.sub(r'.?@\w+[: ]', '', string)
     string = re.sub(r'[\n ]+', ' ', string)
     string = re.sub(r'^RT', ' ', string)
+    string = re.sub(r'#\w+', '', string)
     string = augent_decode(string)
     string = string.strip()
     return string
@@ -36,7 +45,10 @@ def get_plain(string):
 def make_tweet(raw_tweet):
     tweet = grammar_check(get_plain(raw_tweet))
     if not tweet[-1] in {'.', '!', '?'}:
-        tweet += '.'
+        if tweet.endswith(','):
+            tweet = tweet[:-1] + ','
+        else:
+            tweet += '.'
     if len(tweet) <= 140:
         return tweet
     else:
