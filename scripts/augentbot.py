@@ -7,10 +7,14 @@ from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
 from tweet_text import make_tweet, get_plain, viable, get_weight
 from timestamps import read_wo_timestamps, add_timestamp
 
-TWITTER_CONSUMER_KEY = open(os.path.join('..', r'credentials', 'twitter_consumer_key')).read()
-TWITTER_CONSUMER_SECRET = open(os.path.join('..', r'credentials', 'twitter_consumer_secret')).read()
-TWITTER_ACCESS_TOKEN = open(os.path.join('..', r'credentials', 'twitter_access_token')).read()
-TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join('..', r'credentials', 'twitter_access_token_secret')).read()
+TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+                                         'twitter_consumer_key')).read()
+TWITTER_CONSUMER_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+                                            'twitter_consumer_secret')).read()
+TWITTER_ACCESS_TOKEN = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+                                         'twitter_access_token')).read()
+TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+                                                'twitter_access_token_secret')).read()
 
 HOST_NAME = '_jfde'
 
@@ -67,8 +71,15 @@ def process_new_tweets():
     with open(os.path.join('..', 'data', '_lastid.txt')) as file:
         last_id = int(file.read())
 
+    data_file = open(os.path.join('..', 'data', '_lastid.txt'), 'w')
     while True:
         new_tweets = api.home_timeline(count=200, page=p)
+
+        # limit this process to a maximum number of pages
+        if p == 1:
+            log_info('Reached limit of tweets to process.')
+            data_file.close()
+            return
 
         for t in new_tweets:
             if t.created_at > datetime.datetime.utcnow() - datetime.timedelta(days=2):
@@ -76,6 +87,7 @@ def process_new_tweets():
 
             elif t.id <= last_id:
                 log_info('All tweets processed')
+                data_file.close()
                 return
 
             else:
@@ -87,8 +99,7 @@ def process_new_tweets():
                     log_info("Processing tweet '{0}' ... not viable".format(get_plain(t.text)))
 
                 if not logged_last_id:
-                    with open(os.path.join('..', 'data', '_lastid.txt'), 'w') as file:
-                        file.write(str(t.id))
+                    data_file.write(str(t.id))
                     logged_last_id = True
         p += 1
 
@@ -123,7 +134,7 @@ def add_tweets_interactive():
     Every tweet lives in a separate text file of the form '{n}.txt', where n is a number that identifies the tweet
     internally. After creation, these files are automatically being pushed to github.
     A scheduled process hosted at integromat.com automatically gets one tweet per hour from the github repository
-    and tweets it to twitter.com/augentbot. This method allows to create almost arbitrarily many tweets in advance,
+    and tweets it to twitter.com/augentbot . This method allows to create almost arbitrarily many tweets in advance,
     and tweet them to the right time without the need to operate an own server.
     """
     number_tweets = int(input('Number of tweets to produce: '))
@@ -141,11 +152,11 @@ def add_tweets_interactive():
     with open(os.path.join('..', "tweets", "_nexttweet.txt"), 'w') as file:
         file.write(str(next_tweet_id+number_tweets))
 
-    os.system('git commit -m "added tweets {} to {}"'.format(next_tweet_id, next_tweet_id+number_tweets))
+    os.system('git commit -a -m "added tweets {} to {}"'.format(next_tweet_id, next_tweet_id+number_tweets))
 
 
 if __name__ == '__main__':
-    process_new_tweets()
+    # process_new_tweets()
     add_tweets_interactive()
 
     os.system('git push')
