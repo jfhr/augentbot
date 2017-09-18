@@ -26,6 +26,14 @@ auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 
+def confirm(prompt='Confirm this action?'):
+    prompt = prompt.strip()
+    if not prompt.endswith('?'):
+        prompt += '?'
+    prompt += ' (y/n): '
+    return input(prompt).lower().strip() == 'y'
+
+
 def notify_me(text):
     """
     send a message to the user specified as HOST_NAME. Messages longer than 10000
@@ -156,13 +164,13 @@ def add_tweets_interactive():
     with open(os.path.join('..', "tweets", "_nexttweet.txt"), 'w') as file:
         file.write(str(next_tweet_id+number_tweets))
     
-    os.system('git add -A')
-    os.system('git commit -a -m "added tweets {} to {}"'.format(next_tweet_id, next_tweet_id+number_tweets-1))
+    if confirm('Add these tweets?'):
+        os.system('git add -A')
+        os.system('git commit -a -m "added tweets {} to {}"'.format(next_tweet_id, next_tweet_id+number_tweets-1))
+        os.system('git push')
 
 
 if __name__ == '__main__':
     os.system('chcp 65001')
     process_new_tweets()
     add_tweets_interactive()
-
-    os.system('git push')
