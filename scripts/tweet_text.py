@@ -1,8 +1,7 @@
 import language_check
 import re
 
-# BLACKLISTED_WORDS = ['retweet', 'rt ', 'like', 'follo', 'ctl', 'cross the line', 'ifb']
-# Blacklisted words - feature has been deactivated
+IGNORED_USERS = ['_jfde', 'augentbot', 'augentbot_beta']
 ALLOWED_CHARS = """abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_@'"-<>?!/\\#., ()\n"""
 MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
@@ -32,8 +31,7 @@ def viable(tweet):
     o_string = tweet.text
     string = get_plain(o_string)
 
-    return (string != '')
-       and tweet.author.screen_name not in IGNORED_USERS
+    return (string != '') and (tweet.author.screen_name not in IGNORED_USERS)
 
 def augent_decode(string):
     dec_string = ''.join([c if c in ALLOWED_CHARS else ' ' for c in string])

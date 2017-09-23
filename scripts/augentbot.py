@@ -6,7 +6,7 @@ import datetime
 from pymarkovchain import MarkovChain
 from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
 
-from tweet_text import make_tweet, get_plain, viable, get_weight
+from tweet_text import make_tweet, get_plain, viable, get_weight, IGNORED_USERS
 from timestamps import read_wo_timestamps, add_timestamp
 
 TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
@@ -65,6 +65,34 @@ def add_data(entry, weight=1):
     for i in range(weight):
         with open(os.path.join('..', 'data', 'data.txt'), 'a') as file:
             file.write(add_timestamp(entry) + '\n')
+
+
+def followback(api):
+    # follow back
+    followers = [follower.screen_name for follower in api.followers()]
+    followings = [following.screen_name for following in api.friends()]
+    for follower in followers:
+        if follower not in followings + IGNORED_USERS:
+            try:
+                api.create_friendship(follower)
+                log_info('followed @{0}'.format(follower))
+            except tweepy.RateLimitError:
+                log_info('Rate limit exceeded.', True)
+                break
+            except tweepy.TweepError:
+                log_info("Couldn't follow @{0}".format(follower))
+
+    # unfollow back
+    for following in followings:
+        if following not in followers + IGNORED_USERS:
+            try:
+                api.destroy_friendship(following)
+                log_info('unfollowed @{0}'.format(following))
+            except tweepy.RateLimitError:
+                log_info('Rate limit exceeded.', True)
+                break
+            except tweepy.TweepError:
+                log_info("Couldn't follow @{0}".format(following))
 
 
 def process_new_tweets():
