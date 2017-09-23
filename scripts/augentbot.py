@@ -1,6 +1,7 @@
 #! python3
 
 import os
+import platform
 import tweepy
 import datetime
 from pymarkovchain import MarkovChain
@@ -24,6 +25,8 @@ auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
 api = tweepy.API(auth)
+
+venv_path = os.path.join(os.path.expanduser('~'), '.virtualenvs', 'augentbot')
 
 
 def confirm(prompt='Confirm this action?'):
@@ -176,7 +179,8 @@ def tweet_new():
     api.update_status(generate_tweets()[0])
 
 if __name__ == '__main__':
-    import platform
+    if os.path.exists(venv_path):
+        os.system(os.path.join(venv_path, 'activate'))
     if platform.system() == 'Windows':
         os.system('chcp 65001')
     os.system('git pull')
