@@ -1,7 +1,8 @@
 import language_check
 import re
 
-BLACKLISTED_WORDS = ['retweet', 'rt ', 'like', 'follo', 'ctl', 'cross the line', 'ifb']
+# BLACKLISTED_WORDS = ['retweet', 'rt ', 'like', 'follo', 'ctl', 'cross the line', 'ifb']
+# Blacklisted words - feature has been deactivated
 ALLOWED_CHARS = """abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_@'"-<>?!/\\#., ()\n"""
 MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
@@ -24,16 +25,19 @@ def get_weight(tweet):
 
 
 def viable(tweet):
+    # Finds out if a tweet is allowed to be added to the database.
+    # Tweets are not allowed if they
+    #  - contain no text (e.g. pure picture tweets, or tweets that contain only URLs)
+    #  - 
     o_string = tweet.text
     string = get_plain(o_string)
-    return (not any(w in string.lower() for w in BLACKLISTED_WORDS)) \
-        and (string != '') \
-        and all(c in ALLOWED_CHARS for c in o_string)
 
+    return (string != '')
+       and tweet.author.screen_name not in IGNORED_USERS
 
 def augent_decode(string):
-    string = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!\/\\#., ():\n]''', ' ', string)
-    return string
+    dec_string = ''.join([c if c in ALLOWED_CHARS else ' ' for c in string])
+    return dec_string
 
 
 def get_plain(string):
@@ -42,6 +46,7 @@ def get_plain(string):
     string = re.sub(r'[\n ]+', ' ', string)
     string = re.sub(r'^RT', ' ', string)
     string = re.sub(r'#\w+', '', string)
+    string = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!\/\\#., ():\n]''', ' ', string)
     string = augent_decode(string)
     string = string.strip()
     return string

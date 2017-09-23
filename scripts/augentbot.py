@@ -75,7 +75,6 @@ def process_new_tweets():
     Only tweets older than 2 days are being processed. To make sure each tweet isn't being processed more than once,
     the id of the youngest tweet that has been processed is being stored during every run.
     """
-    p = 0
     logged_last_id = False
 
     with open(os.path.join('..', 'data', '_lastid.txt')) as file:
@@ -84,37 +83,40 @@ def process_new_tweets():
     last_id_file = open(os.path.join('..', 'data', '_lastid.txt'), 'w')
     data_file = open(os.path.join('..', 'data', 'data.txt'), 'a')
 
-    while True:
-        new_tweets = api.home_timeline(count=200, page=p)
+    def process_tweet(t):
+        if viable(t):
+            log_info("Processing tweet {0}: '{1}' ... viable".format(t.author.screen_name, get_plain(t.text)))
+            add_data(get_plain(t.text), get_weight(t))
+        else:
+            log_info("Processing tweet {0}: '{1}' ... not viable".format(t.author.screen_name, get_plain(t.text)))
 
-        # limit this process to a maximum number of pages
-        if p == 25:
-            log_info('Reached limit of tweets to process.')
+    def close(last_id, reason=None, notify_me=False):
+            if reason is not None:
+                log_info(reason, notify_me)
             data_file.close()
-            last_id_file.write(new_tweets[0].id)
+            last_id_file.write(last_id)
             last_id_file.close()
             return
 
-        # skip tweets that aren't older than two days
+    for p in range(6):    # limit this process to a maximum number of pages
+        new_tweets = api.home_timeline(count=200, page=p)
+
         for t in new_tweets:
+            # skip tweets that aren't older than two days
             if t.created_at > datetime.datetime.now() - datetime.timedelta(days=2):
                 continue
 
+            # if a tweet is older than the youngest tweet processed last time, end the execution
             elif t.id <= last_id:
-                log_info('All tweets processed')
-                data_file.close()
-                last_id_file.write(t.id)
-                last_id_file.close()
+                close(t.id, 'All tweets processed')
                 return
 
+            # if a tweet is in the range of tweets to process, check if it is viable
             else:
-                if viable(t):
-                    log_info("Processing tweet '{0}' ... viable".format(get_plain(t.text)))
-                    add_data(get_plain(t.text), get_weight(t))
-                else:
-                    log_info("Processing tweet '{0}' ... not viable".format(get_plain(t.text)))
-        p += 1
+                process_tweet(t)
 
+    close(new_tweets[0].id, 'Reached limit of tweets to process.')
+    return
 
 def generate_tweets(count=1):
     mc = MarkovChain()
@@ -137,35 +139,14 @@ def generate_tweets(count=1):
         tweet = make_tweet(mc.generateString())
         log_info("Added tweet '{}'".format(tweet))
         tweets.append(tweet)
-    
+
     return tweets
 
 
-def add_tweets_interactive():
-    """
-    When executed, this method interactively asks for the number of tweets to produce.
-    That many tweets are then produced, printed out and saved to text files in the tweets directory.
-    Every tweet lives in a separate text file of the form '{n}.txt', where n is a number that identifies the tweet
-    internally. After creation, these files are automatically being pushed to github.
-    A scheduled process hosted at integromat.com automatically gets one tweet per hour from the github repository
-    and tweets it to twitter.com/augentbot . This method allows to create almost arbitrarily many tweets in advance,
-    and tweet them to the right time without the need to operate an own server.
-    """
-    number_tweets = int(input('Number of tweets to produce: '))
-    tweets = generate_tweets(number_tweets)
-
-    with open(os.path.join('..', "tweets", "_nexttweet.txt")) as file:
-        next_tweet_id = int(file.read())
-
-    for n in range(next_tweet_id, next_tweet_id+number_tweets):
-        with open(os.path.join('..', "tweets", "{}.txt".format(str(n))), 'w') as tfile:
-            tfile.write(tweets[n-next_tweet_id])
-
-    with open(os.path.join('..', "tweets", "_nexttweet.txt"), 'w') as file:
-        file.write(str(next_tweet_id+number_tweets))
-
+def tweet_new():
+    api.update_status(generate_tweets()[0])
 
 if __name__ == '__main__':
     os.system('chcp 65001')
     process_new_tweets()
-    add_tweets_interactive()
+    tweet_new()
