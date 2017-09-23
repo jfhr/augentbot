@@ -67,7 +67,7 @@ def add_data(entry, weight=1):
             file.write(add_timestamp(entry) + '\n')
 
 
-def followback(api):
+def followback():
     # follow back
     followers = [follower.screen_name for follower in api.followers()]
     followings = [following.screen_name for following in api.friends()]
@@ -103,13 +103,11 @@ def process_new_tweets():
     Only tweets older than 2 days are being processed. To make sure each tweet isn't being processed more than once,
     the id of the youngest tweet that has been processed is being stored during every run.
     """
-    logged_last_id = False
 
     with open(os.path.join('..', 'data', '_lastid.txt')) as file:
         last_id = int(file.read())
   
     last_id_file = open(os.path.join('..', 'data', '_lastid.txt'), 'w')
-    data_file = open(os.path.join('..', 'data', 'data.txt'), 'a')
 
     def process_tweet(t):
         if viable(t):
@@ -121,13 +119,16 @@ def process_new_tweets():
     def close(last_id, reason=None, notify_me=False):
             if reason is not None:
                 log_info(reason, notify_me)
-            data_file.close()
             last_id_file.write(last_id)
             last_id_file.close()
             return
 
     for p in range(6):    # limit this process to a maximum number of pages
         new_tweets = api.home_timeline(count=200, page=p)
+        if len(new_tweets) > 0:
+            last_id = new_tweets[-1].id
+        else:
+            close(last_id, reasong='Reached void page.')
 
         for t in new_tweets:
             # skip tweets that aren't older than two days
@@ -136,7 +137,7 @@ def process_new_tweets():
 
             # if a tweet is older than the youngest tweet processed last time, end the execution
             elif t.id <= last_id:
-                close(t.id, 'All tweets processed')
+                close(t.id, 'All tweets processed.')
                 return
 
             # if a tweet is in the range of tweets to process, check if it is viable
@@ -179,5 +180,6 @@ if __name__ == '__main__':
     if platform.system() == 'Windows':
         os.system('chcp 65001')
     
+    followback()
     process_new_tweets()
     tweet_new()
