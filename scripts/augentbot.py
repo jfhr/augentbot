@@ -179,7 +179,8 @@ if __name__ == '__main__':
     import platform
     if platform.system() == 'Windows':
         os.system('chcp 65001')
-    
+    os.system('git pull')
+
     followback()
     process_new_tweets()
     tweet_new()
