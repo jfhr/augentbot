@@ -147,6 +147,9 @@ def tweet_new():
     api.update_status(generate_tweets()[0])
 
 if __name__ == '__main__':
-    os.system('chcp 65001')
+    import platform
+    if platform.system() == 'Windows':
+        os.system('chcp 65001')
+    
     process_new_tweets()
     tweet_new()
