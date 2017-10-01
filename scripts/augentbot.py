@@ -26,7 +26,8 @@ auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
 api = tweepy.API(auth)
 
-venv_path = os.path.join(os.path.expanduser('~'), '.virtualenvs', 'augentbot')
+# venv_path = os.path.join(os.path.expanduser('~'), '.virtualenvs', 'augentbot')
+# automatic virtualenv activation is disabled for now
 
 
 def confirm(prompt='Confirm this action?'):
@@ -71,8 +72,8 @@ def add_data(entry, weight=1):
 
 
 def followback():
-    # follow back
     followers = [follower.screen_name for follower in api.followers()]
+    # follow back
     followings = [following.screen_name for following in api.friends()]
     for follower in followers:
         if follower not in followings + IGNORED_USERS:
@@ -131,7 +132,8 @@ def process_new_tweets():
         if len(new_tweets) > 0:
             last_id = new_tweets[-1].id
         else:
-            close(last_id, reasong='Reached void page.')
+            close(last_id, reason='Reached void page.')
+            # Respects tweepy pagination limits
 
         for t in new_tweets:
             # skip tweets that aren't older than two days
@@ -149,6 +151,7 @@ def process_new_tweets():
 
     close(new_tweets[0].id, 'Reached limit of tweets to process.')
     return
+
 
 def generate_tweets(count=1):
     mc = MarkovChain()
@@ -178,13 +181,32 @@ def generate_tweets(count=1):
 def tweet_new():
     api.update_status(generate_tweets()[0])
 
-if __name__ == '__main__':
-    if os.path.exists(venv_path):
-        os.system(os.path.join(venv_path, 'activate'))
-    if platform.system() == 'Windows':
-        os.system('chcp 65001')
-    os.system('git pull')
 
-    followback()
-    process_new_tweets()
-    tweet_new()
+def tweet_from_buffer():
+    with open(os.path.join('..', 'data', 'buffer.txt')) as file:
+        buffer = file.readlines()
+
+    api.update_status(buffer.pop())
+
+    with open(os.path.join('..', 'data', 'buffer.txt'), 'w') as file:
+        file.write('\n'.join(buffer))
+
+
+if __name__ == '__main__':
+    # if os.path.exists(venv_path):
+    #     os.system(os.path.join(venv_path, 'activate'))
+    if platform.system() == 'Windows':
+        os.system('chcp 65001')  # fixes encoding errors on windows
+    os.system('git fetch')
+
+    try:
+        followback()
+        process_new_tweets()
+        tweet_new()
+    except Exception as e:
+        log_info(e, notify=True)
+        try:
+            tweet_from_buffer()
+        except Exception as e:
+            log_info('{} in buffer'.format(e), notify=True)
+

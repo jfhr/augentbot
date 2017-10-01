@@ -28,18 +28,18 @@ def get_weight(tweet):
         return round(((tweet.retweet_count*3 + tweet.favorite_count)/tweet.author.followers_count) * 50) + 1
     else:
         return (r*5 + f)/p
-        return ((tweet.retweet_count*5 + tweet.favorite_count)*10/tweet.author.followers_count) ^ 3 * 10
 
 
 def viable(tweet):
     # Finds out if a tweet is allowed to be added to the database.
     # Tweets are not allowed if they
     #  - contain no text (e.g. pure picture tweets, or tweets that contain only URLs)
-    #  - 
+    #  - come from an ignored user
     o_string = tweet.text
     string = get_plain(o_string)
 
     return (string != '') and (tweet.author.screen_name not in IGNORED_USERS)
+
 
 def augent_decode(string):
     dec_string = ''.join([c if c in ALLOWED_CHARS else ' ' for c in string])
