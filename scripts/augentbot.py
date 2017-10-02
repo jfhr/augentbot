@@ -194,12 +194,12 @@ def tweet_from_buffer():
         file.write('\n'.join(buffer))
 
 
-if __name__ == '__main__':
+def run():
     # if os.path.exists(venv_path):
     #     os.system(os.path.join(venv_path, 'activate'))
     if platform.system() == 'Windows':
         os.system('chcp 65001')  # fixes encoding errors on windows
-    os.system('git fetch')
+    os.system('git pull')
 
     try:
         followback()
@@ -211,3 +211,22 @@ if __name__ == '__main__':
             tweet_from_buffer()
         except Exception as e:
             log_info('{} in buffer'.format(e), notify=True)
+
+
+def run_scheduled():
+    try:
+        followback()
+        process_new_tweets()
+        tweet_new()
+    except Exception as e:
+        log_info(e, notify=True)
+        try:
+            tweet_from_buffer()
+        except Exception as e:
+            log_info('{} in buffer'.format(e), notify=True)
+
+    
+if __name__ == '__main__':
+    if input('Run now? (y/n)').lower().strip() == 'y':
+        run()
+
