@@ -206,7 +206,7 @@ def run():
         process_new_tweets()
         tweet_new()
     except Exception as e:
-        log_info(e, notify=True)
+        log_info(str(e), notify=True)
         try:
             tweet_from_buffer()
         except Exception as e:
@@ -219,7 +219,7 @@ def run_scheduled():
         process_new_tweets()
         tweet_new()
     except Exception as e:
-        log_info(e, notify=True)
+        log_info(str(e), notify=True)
         try:
             tweet_from_buffer()
         except Exception as e:
