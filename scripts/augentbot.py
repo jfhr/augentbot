@@ -143,21 +143,22 @@ def process_new_tweets():
             process_tweet(t)
 
 
-def generate_tweets(count=1):
-    mc = MarkovChain()
+def generate_tweets(count=1, mc=None):
+    if mc is None:
+        mc = MarkovChain()
 
-    base_corpus = ''
-    base_corpus += webtext.raw()
-    base_corpus += gutenberg.raw()
-    base_corpus += udhr.raw('English-Latin1')
+        base_corpus = ''
+        base_corpus += webtext.raw()
+        base_corpus += gutenberg.raw()
+        base_corpus += udhr.raw('English-Latin1')
 
-    twitter_samples_list = twitter_samples.strings()
-    base_corpus += '\n'.join([get_plain(t) for t in twitter_samples_list])
+        twitter_samples_list = twitter_samples.strings()
+        base_corpus += '\n'.join([get_plain(t) for t in twitter_samples_list])
 
-    with open(os.path.join(DATA, "data.txt")) as file:
-        collected_data = '\n'.join(read_wo_timestamps(file.readlines()))
+        with open(os.path.join(DATA, "data.txt")) as file:
+            collected_data = '\n'.join(read_wo_timestamps(file.readlines()))
 
-    mc.generateDatabase(base_corpus + collected_data)
+        mc.generateDatabase(base_corpus + collected_data)
 
     tweets = []
     for i in range(count):
@@ -168,8 +169,13 @@ def generate_tweets(count=1):
     return tweets
 
 
-def tweet_new():
-    api.update_status(generate_tweets()[0])
+def tweet_new(create_buffers=0):
+    tweets = [make_tweet(t) for t in generate_tweets(count=1+create_buffers)]
+    api.update_status(tweets[0])
+    
+    if create_buffers:
+        with open(os.path.join(DATA, 'buffer.txt'), 'a') as file:
+            file.write('\n'.join(tweets[1:]))
 
 
 def tweet_from_buffer():
@@ -182,7 +188,7 @@ def tweet_from_buffer():
         file.write('\n'.join(buffer))
 
 
-def run():
+def run(create_buffers=0):
     # if os.path.exists(venv_path):
     #     os.system(os.path.join(venv_path, 'activate'))
     if platform.system() == 'Windows':
@@ -192,7 +198,7 @@ def run():
     try:
         followback()
         process_new_tweets()
-        tweet_new()
+        tweet_new(create_buffers)
     except Exception as e:
         log_info(str(e), notify=True)
         try:
@@ -201,11 +207,11 @@ def run():
             log_info('{} in buffer'.format(str(e)), notify=True)
 
 
-def run_scheduled():
+def run_scheduled(create_buffers=0):
     try:
         followback()
         process_new_tweets()
-        tweet_new()
+        tweet_new(create_buffers)
     except Exception as e:
         log_info(str(e), notify=True)
         try:
