@@ -21,6 +21,8 @@ TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augent
 
 HOST_NAME = '_jfde'
 
+DATA = os.path.join(os.path.expanduser('~'), 'augentbot', 'data')
+
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
@@ -58,7 +60,7 @@ def log_info(entry, notify=False):
     user specified as HOST_NAME via twitter dm. This requires that the user
     has allowed receiving dms from this account
     """
-    with open(os.path.join('..', "data", "log.txt"), 'a') as file:
+    with open(os.path.join(DATA, "log.txt"), 'a') as file:
         file.write(add_timestamp(entry) + '\n')
     print(entry)
     if notify:
@@ -67,7 +69,7 @@ def log_info(entry, notify=False):
 
 def add_data(entry, weight=1):
     for i in range(weight):
-        with open(os.path.join('..', 'data', 'data.txt'), 'a') as file:
+        with open(os.path.join(DATA, 'data.txt'), 'a') as file:
             file.write(add_timestamp(entry) + '\n')
 
 
@@ -108,10 +110,10 @@ def process_new_tweets():
     the id of the youngest tweet that has been processed is being stored during every run.
     """
 
-    with open(os.path.join('..', 'data', '_lastid.txt')) as file:
+    with open(os.path.join(DATA, '_lastid.txt')) as file:
         last_id = int(file.read())
   
-    last_id_file = open(os.path.join('..', 'data', '_lastid.txt'), 'w')
+    last_id_file = open(os.path.join(DATA, '_lastid.txt'), 'w')
 
     def process_tweet(t):
         if viable(t):
@@ -164,7 +166,7 @@ def generate_tweets(count=1):
     twitter_samples_list = twitter_samples.strings()
     base_corpus += '\n'.join([get_plain(t) for t in twitter_samples_list])
 
-    with open(os.path.join('..', "data", "data.txt")) as file:
+    with open(os.path.join(DATA, "data.txt")) as file:
         collected_data = '\n'.join(read_wo_timestamps(file.readlines()))
 
     mc.generateDatabase(base_corpus + collected_data)
@@ -183,12 +185,12 @@ def tweet_new():
 
 
 def tweet_from_buffer():
-    with open(os.path.join('..', 'data', 'buffer.txt')) as file:
+    with open(os.path.join(DATA, 'buffer.txt')) as file:
         buffer = file.readlines()
 
     api.update_status(buffer.pop())
 
-    with open(os.path.join('..', 'data', 'buffer.txt'), 'w') as file:
+    with open(os.path.join(DATA, 'buffer.txt'), 'w') as file:
         file.write('\n'.join(buffer))
 
 
@@ -209,4 +211,3 @@ if __name__ == '__main__':
             tweet_from_buffer()
         except Exception as e:
             log_info('{} in buffer'.format(e), notify=True)
-
