@@ -125,7 +125,7 @@ def process_new_tweets():
     def close(last_id, reason=None, notify_me=False):
             if reason is not None:
                 log_info(reason, notify_me)
-            last_id_file.write(last_id)
+            last_id_file.write(str(last_id))
             last_id_file.close()
             return
 
@@ -210,7 +210,7 @@ def run():
         try:
             tweet_from_buffer()
         except Exception as e:
-            log_info('{} in buffer'.format(e), notify=True)
+            log_info('{} in buffer'.format(str(e), notify=True)
 
 
 def run_scheduled():
@@ -223,7 +223,7 @@ def run_scheduled():
         try:
             tweet_from_buffer()
         except Exception as e:
-            log_info('{} in buffer'.format(e), notify=True)
+            log_info('{} in buffer'.format(str(e), notify=True)
 
     
 if __name__ == '__main__':
