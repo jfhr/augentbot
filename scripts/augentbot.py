@@ -74,9 +74,9 @@ def add_data(entry, weight=1):
 
 
 def followback():
-    followers = [follower.screen_name for follower in api.followers()]
+    followers = [follower.screen_name for follower in tweepy.Cursor(api.followers).items()]
     # follow back
-    followings = [following.screen_name for following in api.friends()]
+    followings = [following.screen_name for following in tweepy.Cursor(api.friends).items()]
     for follower in followers:
         if follower not in followings + IGNORED_USERS:
             try:
@@ -123,36 +123,24 @@ def process_new_tweets():
             log_info("Processing tweet {0}: '{1}' ... not viable".format(t.author.screen_name, get_plain(t.text)))
 
     def close(last_id, reason=None, notify_me=False):
-            if reason is not None:
-                log_info(reason, notify_me)
-            last_id_file.write(str(last_id))
-            last_id_file.close()
+        if reason is not None:
+            log_info(reason, notify_me)
+        last_id_file.write(str(last_id))
+        last_id_file.close()
+        return
+    
+    for t in tweepy.Cursor(api.home_timeline).items():
+        # skip tweets that aren't older than two days
+        if t.created_at > datetime.datetime.now() - datetime.timedelta(days=2):
+            continue
+
+        # if a tweet is older than the youngest tweet processed last time, end the execution
+        elif t.id <= last_id:
+            close(t.id, 'All tweets processed.')
             return
 
-    for p in range(6):    # limit this process to a maximum number of pages
-        new_tweets = api.home_timeline(count=200, page=p)
-        if len(new_tweets) > 0:
-            last_id = new_tweets[-1].id
         else:
-            close(last_id, reason='Reached void page.')
-            # Respects tweepy pagination limits
-
-        for t in new_tweets:
-            # skip tweets that aren't older than two days
-            if t.created_at > datetime.datetime.now() - datetime.timedelta(days=2):
-                continue
-
-            # if a tweet is older than the youngest tweet processed last time, end the execution
-            elif t.id <= last_id:
-                close(t.id, 'All tweets processed.')
-                return
-
-            # if a tweet is in the range of tweets to process, check if it is viable
-            else:
-                process_tweet(t)
-
-    close(new_tweets[0].id, 'Reached limit of tweets to process.')
-    return
+            process_tweet(t)
 
 
 def generate_tweets(count=1):
@@ -206,11 +194,11 @@ def run():
         process_new_tweets()
         tweet_new()
     except Exception as e:
-        log_info(e, notify=True)
+        log_info(str(e), notify=True)
         try:
             tweet_from_buffer()
         except Exception as e:
-            log_info('{} in buffer'.format(str(e), notify=True)
+            log_info('{} in buffer'.format(str(e)), notify=True)
 
 
 def run_scheduled():
@@ -219,14 +207,13 @@ def run_scheduled():
         process_new_tweets()
         tweet_new()
     except Exception as e:
-        log_info(e, notify=True)
+        log_info(str(e), notify=True)
         try:
             tweet_from_buffer()
         except Exception as e:
-            log_info('{} in buffer'.format(str(e), notify=True)
+            log_info('{} in buffer'.format(str(e)), notify=True)
 
     
 if __name__ == '__main__':
-    if input('Run now? (y/n)').lower().strip() == 'y':
+    if confirm('Run now'):
         run()
-
