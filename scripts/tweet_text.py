@@ -2,11 +2,7 @@ import language_check
 import re
 import os
 import sys
-
-# add portable java jre for language_check module
-java_path = os.path.join('..', '.runtime', 'jre64', 'bin')
-if os.path.exists(java_path):
-    sys.path.append(java_path)
+from math import sqrt
 
 
 IGNORED_USERS = ['_jfde', 'augentbot', 'augentbot_beta']
@@ -24,10 +20,7 @@ def get_weight(tweet):
     f = tweet.favorite_count
     p = tweet.author.followers_count
 
-    if tweet.author.screen_name != MY_NAME:
-        return round(((tweet.retweet_count*3 + tweet.favorite_count)/tweet.author.followers_count) * 50) + 1
-    else:
-        return (r*5 + f)/p
+    return (r*5 + f)/sqrt(p)
 
 
 def viable(tweet):

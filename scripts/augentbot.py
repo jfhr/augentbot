@@ -28,9 +28,6 @@ auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
 api = tweepy.API(auth)
 
-# venv_path = os.path.join(os.path.expanduser('~'), '.virtualenvs', 'augentbot')
-# automatic virtualenv activation is disabled for now
-
 
 def confirm(prompt='Confirm this action?'):
     prompt = prompt.strip()
@@ -52,7 +49,7 @@ def notify_me(text):
             log_info("{0} when trying to send the following dm:\n    '{1}'".format(e, text))
 
 
-def log_info(entry, notify=False):
+def log_info(entry, notify=False, file=None, close_file=True):
     """
     Attaches a timestamp with the current time to the entry,
     prints the entry and saves it in the log.txt file of the data directory.
@@ -60,17 +57,26 @@ def log_info(entry, notify=False):
     user specified as HOST_NAME via twitter dm. This requires that the user
     has allowed receiving dms from this account
     """
-    with open(os.path.join(DATA, "log.txt"), 'a') as file:
-        file.write(add_timestamp(entry) + '\n')
+    if file is None:
+        file = open(os.path.join(DATA, "log.txt"), 'a')
+    
+    file.write(add_timestamp(entry) + '\n')
     print(entry)
     if notify:
         notify_me(entry)
+    
+    if close_file:
+        file.close()
 
+def add_data(entry, weight=1, file=None, close_file=True):
+    if file is None:
+        file = open(os.path.join(DATA, 'data.txt'), 'a')
 
-def add_data(entry, weight=1):
     for i in range(weight):
-        with open(os.path.join(DATA, 'data.txt'), 'a') as file:
-            file.write(add_timestamp(entry) + '\n')
+        file.write(add_timestamp(entry) + '\n')
+    
+    if close_file:
+        file.close()
 
 
 def followback():
@@ -101,19 +107,57 @@ def followback():
                 log_info("Couldn't follow @{0}".format(following))
 
 
+
+""" experimentally disabled this extensive method. Current active method is simply processing every tweet that isn't older than 7 days."""
+# def process_new_tweets():
+#     """
+#     Gets new tweets from the augentbot home timeline, checks every tweet for viability, and adds that tweet to
+#     the data log. If a tweet has a high weight (many likes and retweets compared to the author's follower count),
+#     it is being added more often.
+#     Only tweets older than 2 days are being processed. To make sure each tweet isn't being processed more than once,
+#     the id of the youngest tweet that has been processed is being stored during every run.
+#     """
+
+#     with open(os.path.join(DATA, '_lastid.txt')) as file:
+#         last_id = int(file.read())
+  
+#     last_id_file = open(os.path.join(DATA, '_lastid.txt'), 'w')
+
+#     def process_tweet(t):
+#         if viable(t):
+#             log_info("Processing tweet {0}: '{1}' ... viable".format(t.author.screen_name, get_plain(t.text)))
+#             add_data(get_plain(t.text), get_weight(t))
+#         else:
+#             log_info("Processing tweet {0}: '{1}' ... not viable".format(t.author.screen_name, get_plain(t.text)))
+
+#     def close(last_id, reason=None, notify_me=False):
+#         if reason is not None:
+#             log_info(reason, notify_me)
+#         last_id_file.write(str(last_id))
+#         last_id_file.close()
+#         return
+    
+#     for t in tweepy.Cursor(api.home_timeline).items():
+#         # skip tweets that aren't older than two days
+#         if t.created_at > datetime.datetime.now() - datetime.timedelta(days=2):
+#             continue
+#         # if a tweet is older than the youngest tweet processed last time, end the execution
+#         if t.id <= last_id:
+#             close(t.id, 'All tweets processed.')
+#             return
+        
+#         else:
+#             process_tweet(t)
+
 def process_new_tweets():
     """
     Gets new tweets from the augentbot home timeline, checks every tweet for viability, and adds that tweet to
     the data log. If a tweet has a high weight (many likes and retweets compared to the author's follower count),
     it is being added more often.
-    Only tweets older than 2 days are being processed. To make sure each tweet isn't being processed more than once,
-    the id of the youngest tweet that has been processed is being stored during every run.
+    If a tweet older than 7 days is encountered, the method is being returned.
     """
-
-    with open(os.path.join(DATA, '_lastid.txt')) as file:
-        last_id = int(file.read())
-  
-    last_id_file = open(os.path.join(DATA, '_lastid.txt'), 'w')
+    data_file = open(os.path.join(DATA, 'data.txt'), 'a')
+    log_file = open(os.path.join(Data, 'log.txt'), 'a')  # prevent opening and closing these files for every data/logging entry
 
     def process_tweet(t):
         if viable(t):
@@ -122,25 +166,12 @@ def process_new_tweets():
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable".format(t.author.screen_name, get_plain(t.text)))
 
-    def close(last_id, reason=None, notify_me=False):
-        if reason is not None:
-            log_info(reason, notify_me)
-        last_id_file.write(str(last_id))
-        last_id_file.close()
-        return
-    
     for t in tweepy.Cursor(api.home_timeline).items():
-        # skip tweets that aren't older than two days
-        if t.created_at > datetime.datetime.now() - datetime.timedelta(days=2):
-            continue
-
-        # if a tweet is older than the youngest tweet processed last time, end the execution
-        elif t.id <= last_id:
-            close(t.id, 'All tweets processed.')
+        if t.created_at > datetime.datetime.now() - datetime.timedelta(days=7):
+            data_file.close()
+            log_file.close()
             return
-
-        else:
-            process_tweet(t)
+        process_tweet(t)
 
 
 def generate_tweets(count=1, mc=None):
@@ -189,8 +220,6 @@ def tweet_from_buffer():
 
 
 def run(create_buffers=0):
-    # if os.path.exists(venv_path):
-    #     os.system(os.path.join(venv_path, 'activate'))
     if platform.system() == 'Windows':
         os.system('chcp 65001')  # fixes encoding errors on windows
     os.system('git pull')
