@@ -216,7 +216,7 @@ def tweet_from_buffer():
     api.update_status(buffer.pop())
 
     with open(os.path.join(DATA, 'buffer.txt'), 'w') as file:
-        file.write('\n'.join(buffer))
+        file.write(''.join(buffer)[:-1])  # remove newline at end of file
 
 
 def run(create_buffers=0):
