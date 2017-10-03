@@ -6,6 +6,7 @@ import tweepy
 import datetime
 from pymarkovchain import MarkovChain
 from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
+import traceback
 
 from tweet_text import make_tweet, get_plain, viable, get_weight, IGNORED_USERS
 from timestamps import read_wo_timestamps, add_timestamp
@@ -49,7 +50,7 @@ def notify_me(text):
             log_info("{0} when trying to send the following dm:\n    '{1}'".format(e, text))
 
 
-def log_info(entry, notify=False, file=None, close_file=True):
+def log_info(entry, notify=False, file=None, close_file=True, include_traceback=False):
     """
     Attaches a timestamp with the current time to the entry,
     prints the entry and saves it in the log.txt file of the data directory.
@@ -57,6 +58,8 @@ def log_info(entry, notify=False, file=None, close_file=True):
     user specified as HOST_NAME via twitter dm. This requires that the user
     has allowed receiving dms from this account
     """
+    if include_traceback:
+        entry += traceback.extract_stack()
     if file is None:
         file = open(os.path.join(DATA, "log.txt"), 'a')
     
@@ -242,11 +245,11 @@ def run_scheduled(create_buffers=0):
         process_new_tweets()
         tweet_new(create_buffers)
     except Exception as e:
-        log_info(str(e), notify=True)
+        log_info(str(e), notify=True, include_traceback=True)
         try:
             tweet_from_buffer()
         except Exception as e:
-            log_info('{} in buffer'.format(str(e)), notify=True)
+            log_info('{} in buffer'.format(str(e)), notify=True, include_traceback=True)
 
     
 if __name__ == '__main__':
