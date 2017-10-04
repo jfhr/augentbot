@@ -2,6 +2,7 @@
 
 import schedule
 import os
+import platform
 from importlib import reload
 from sleeping import print_sleep
 
@@ -10,6 +11,8 @@ import augentbot
 
 def connect_run() -> None:
     os.system('git pull')
+    if platform.system() == 'Windows':
+        os.system('chcp 65001')  # fixes encoding errors on windows
     reload(augentbot)
     augentbot.run_scheduled(create_buffers=1)
 
