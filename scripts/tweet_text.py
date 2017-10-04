@@ -1,12 +1,10 @@
 #! python3
 
-import language_check
 import re
-import os
-import sys
 from math import sqrt
-import tweepy
 
+import language_check
+import tweepy
 
 IGNORED_USERS = ['_jfde', 'augentbot', 'augentbot_beta']
 ALLOWED_CHARS = """abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_@'"-<>?!/\\#., ()\n"""

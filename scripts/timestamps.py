@@ -1,8 +1,8 @@
 #! python3
 
+import _io
 import datetime
 from typing import Iterable
-import _io
 
 
 def add_timestamp(entry: str) -> str:

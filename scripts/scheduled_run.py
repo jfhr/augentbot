@@ -1,11 +1,12 @@
 #! python3
 
-import schedule
 import os
 from importlib import reload
-from sleeping import print_sleep
+
+import schedule
 
 import augentbot
+from sleeping import print_sleep
 
 
 def connect_run() -> None:

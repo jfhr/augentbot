@@ -1,16 +1,17 @@
 #! python3
 
+import _io
+import datetime
 import os
 import platform
-import tweepy
-import datetime
-from pymarkovchain import MarkovChain
-from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
 from typing import Optional, Iterable
-import _io
 
-from tweet_text import make_tweet_text, get_plain, viable, get_weight, IGNORED_USERS
+import tweepy
+from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
+from pymarkovchain import MarkovChain
+
 from timestamps import read_wo_timestamps, add_timestamp
+from tweet_text import make_tweet_text, get_plain, viable, get_weight, IGNORED_USERS
 
 TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
                                          'twitter_consumer_key')).read()
