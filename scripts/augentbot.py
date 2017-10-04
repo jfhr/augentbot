@@ -212,9 +212,16 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
 """
 Information on buffer:
 In The augentbot data directory lives a file buffer.txt, which contains pre-produced tweets. In case the full augentbot
-code throws an exception, a tweet from that file is being tweeted to ensure the bot still keeps tweeting. When tweeting
+code throws an exception, a tweet from that file is being tweeted to ensure the bot still keeps tweeting. When producing
 a new tweet, one can choose to simultaneously add any number of tweets, produced from the same database, to the 
 buffer.txt file, so it always contains a solid amount of tweets.
+
+Example usage:
+import augentbot
+try:
+    augentbot.run(create_buffers=1)
+except Exception as e:
+    augenbot.tweet_from_buffer()
 """
 
 
@@ -240,23 +247,6 @@ def tweet_from_buffer() -> None:
 
 
 def run(create_buffers: int = 0) -> None:
-    if platform.system() == 'Windows':
-        os.system('chcp 65001')  # fixes encoding errors on windows
-    os.system('git pull')
-
-    try:
-        followback()
-        process_new_tweets()
-        tweet_new(create_buffers)
-    except Exception as e:
-        log_info(str(e), notify=True)
-        try:
-            tweet_from_buffer()
-        except Exception as e:
-            log_info('{} in buffer'.format(str(e)), notify=True)
-
-
-def run_scheduled(create_buffers: int = 0) -> None:
     try:
         followback()
         process_new_tweets()
@@ -270,5 +260,8 @@ def run_scheduled(create_buffers: int = 0) -> None:
 
     
 if __name__ == '__main__':
+    if platform.system() == 'Windows':
+        os.system('chcp 65001')  # fixes encoding errors on windows
+
     if confirm('Run now'):
         run()
