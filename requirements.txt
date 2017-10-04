@@ -1,5 +1,6 @@
-PyMarkovChain==1.8
-tweepy==3.5.0
-language-check==1.0
-nltk==3.2.4
+schedule
+PyMarkovChain
+tweepy
+language-check
+nltk
 # also requires java runtime environment for the language checking.

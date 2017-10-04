@@ -7,8 +7,10 @@ import datetime
 from pymarkovchain import MarkovChain
 from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
 import traceback
+from typing import Optional, Iterable
+import _io
 
-from tweet_text import make_tweet, get_plain, viable, get_weight, IGNORED_USERS
+from tweet_text import make_tweet_text, get_plain, viable, get_weight, IGNORED_USERS
 from timestamps import read_wo_timestamps, add_timestamp
 
 TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
@@ -30,7 +32,7 @@ auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 
-def confirm(prompt='Confirm this action?'):
+def confirm(prompt: str = 'Confirm this action?') -> bool:
     prompt = prompt.strip()
     if not prompt.endswith('?'):
         prompt += '?'
@@ -38,7 +40,7 @@ def confirm(prompt='Confirm this action?'):
     return input(prompt).lower().strip() == 'y'
 
 
-def notify_me(text):
+def notify_me(text: str) -> None:
     """
     send a message to the user specified as HOST_NAME. Messages longer than 10000
     characters will be split in submessages due to twitter limits
@@ -50,7 +52,11 @@ def notify_me(text):
             log_info("{0} when trying to send the following dm:\n    '{1}'".format(e, text))
 
 
-def log_info(entry, notify=False, file=None, close_file=True, include_traceback=False):
+def log_info(entry: str,
+             notify: bool = False,
+             file: Optional[_io.TextIOWrapper] = None,
+             close_file: bool = True,
+             include_traceback: bool = False) -> None:
     """
     Attaches a timestamp with the current time to the entry,
     prints the entry and saves it in the log.txt file of the data directory.
@@ -59,7 +65,7 @@ def log_info(entry, notify=False, file=None, close_file=True, include_traceback=
     has allowed receiving dms from this account
     """
     if include_traceback:
-        entry += traceback.extract_stack()
+        entry += str(traceback.extract_stack())
     if file is None:
         file = open(os.path.join(DATA, "log.txt"), 'a')
     
@@ -71,7 +77,8 @@ def log_info(entry, notify=False, file=None, close_file=True, include_traceback=
     if close_file:
         file.close()
 
-def add_data(entry, weight=1, file=None, close_file=True):
+
+def add_data(entry: str, weight: int = 1, file: Optional[_io.TextIOWrapper] = None, close_file: bool = True) -> None:
     if file is None:
         file = open(os.path.join(DATA, 'data.txt'), 'a')
 
@@ -82,7 +89,7 @@ def add_data(entry, weight=1, file=None, close_file=True):
         file.close()
 
 
-def followback():
+def followback() -> None:
     followers = [follower.screen_name for follower in tweepy.Cursor(api.followers).items()]
     # follow back
     followings = [following.screen_name for following in tweepy.Cursor(api.friends).items()]
@@ -110,8 +117,8 @@ def followback():
                 log_info("Couldn't follow @{0}".format(following))
 
 
-
-""" experimentally disabled this extensive method. Current active method is simply processing every tweet that isn't older than 7 days."""
+""" experimentally disabled this extensive method. Current active method is simply processing every tweet 
+that isn't older than 7 days."""
 # def process_new_tweets():
 #     """
 #     Gets new tweets from the augentbot home timeline, checks every tweet for viability, and adds that tweet to
@@ -152,7 +159,8 @@ def followback():
 #         else:
 #             process_tweet(t)
 
-def process_new_tweets():
+
+def process_new_tweets() -> None:
     """
     Gets new tweets from the augentbot home timeline, checks every tweet for viability, and adds that tweet to
     the data log. If a tweet has a high weight (many likes and retweets compared to the author's follower count),
@@ -160,14 +168,15 @@ def process_new_tweets():
     If a tweet older than 7 days is encountered, the method is being returned.
     """
     data_file = open(os.path.join(DATA, 'data.txt'), 'a')
-    log_file = open(os.path.join(Data, 'log.txt'), 'a')  # prevent opening and closing these files for every data/logging entry
+    log_file = open(os.path.join(DATA, 'log.txt'), 'a')  # don't open and close files for every data/logging entry
 
-    def process_tweet(t):
-        if viable(t):
-            log_info("Processing tweet {0}: '{1}' ... viable".format(t.author.screen_name, get_plain(t.text)))
-            add_data(get_plain(t.text), get_weight(t))
+    def process_tweet(tweet):
+        if viable(tweet):
+            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, get_plain(tweet.text)))
+            add_data(get_plain(tweet.text), get_weight(tweet))
         else:
-            log_info("Processing tweet {0}: '{1}' ... not viable".format(t.author.screen_name, get_plain(t.text)))
+            log_info("Processing tweet {0}: '{1}' ... not viable"
+                     .format(tweet.author.screen_name, get_plain(tweet.text)))
 
     for t in tweepy.Cursor(api.home_timeline).items():
         if t.created_at > datetime.datetime.now() - datetime.timedelta(days=7):
@@ -177,7 +186,7 @@ def process_new_tweets():
         process_tweet(t)
 
 
-def generate_tweets(count=1, mc=None):
+def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterable[str]:
     if mc is None:
         mc = MarkovChain()
 
@@ -203,8 +212,19 @@ def generate_tweets(count=1, mc=None):
     return tweets
 
 
-def tweet_new(create_buffers=0):
-    tweets = [make_tweet(t) for t in generate_tweets(count=1+create_buffers)]
+"""
+Information on buffer:
+In The augentbot data directory lives a file buffer.txt, which contains pre-produced tweets. In case the full augentbot
+code throws an exception, a tweet from that file is being tweeted to ensure the bot still keeps tweeting. When tweeting
+a new tweet, one can choose to simultaneously add any number of tweets, produced from the same database, to the 
+buffer.txt file, so it always contains a solid amount of tweets.
+"""
+
+
+def tweet_new(create_buffers: int = 0) -> None:
+    tweets = [make_tweet(t) for t in generate_tweets(count=1+create_buffers)]  # create a tweet and, if specified in
+    # function call, create additional tweets for the tweet buffer
+
     api.update_status(tweets[0])
     
     if create_buffers:
@@ -212,7 +232,7 @@ def tweet_new(create_buffers=0):
             file.write('\n'.join(tweets[1:]))
 
 
-def tweet_from_buffer():
+def tweet_from_buffer() -> None:
     with open(os.path.join(DATA, 'buffer.txt')) as file:
         buffer = file.readlines()
 
@@ -222,7 +242,7 @@ def tweet_from_buffer():
         file.write(''.join(buffer)[:-1])  # remove newline at end of file
 
 
-def run(create_buffers=0):
+def run(create_buffers: int = 0) -> None:
     if platform.system() == 'Windows':
         os.system('chcp 65001')  # fixes encoding errors on windows
     os.system('git pull')
@@ -239,7 +259,7 @@ def run(create_buffers=0):
             log_info('{} in buffer'.format(str(e)), notify=True)
 
 
-def run_scheduled(create_buffers=0):
+def run_scheduled(create_buffers: int = 0) -> None:
     try:
         followback()
         process_new_tweets()

@@ -3,6 +3,7 @@ import re
 import os
 import sys
 from math import sqrt
+import tweepy
 
 
 IGNORED_USERS = ['_jfde', 'augentbot', 'augentbot_beta']
@@ -11,11 +12,11 @@ MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
 
 
-def grammar_check(text):
+def grammar_check(text: str) -> str:
     return language_check.correct(text, lt.check(text))
 
 
-def get_weight(tweet):
+def get_weight(tweet: tweepy.Status) -> int:
     r = tweet.retweet_count
     f = tweet.favorite_count
     p = tweet.author.followers_count
@@ -23,7 +24,7 @@ def get_weight(tweet):
     return (r*5 + f)/sqrt(p)
 
 
-def viable(tweet):
+def viable(tweet: tweepy.Status) -> bool:
     # Finds out if a tweet is allowed to be added to the database.
     # Tweets are not allowed if they
     #  - contain no text (e.g. pure picture tweets, or tweets that contain only URLs)
@@ -34,12 +35,12 @@ def viable(tweet):
     return (string != '') and (tweet.author.screen_name not in IGNORED_USERS)
 
 
-def augent_decode(string):
+def augent_decode(string: str) -> str:
     dec_string = ''.join([c if c in ALLOWED_CHARS else ' ' for c in string])
     return dec_string
 
 
-def get_plain(string):
+def get_plain(string: str) -> str:
     string = re.sub(r'https://t.co/\S+', '', string)
     string = re.sub(r'.?@\w+[: ]', '', string)
     string = re.sub(r'[\n ]+', ' ', string)
@@ -51,7 +52,7 @@ def get_plain(string):
     return string
 
 
-def make_tweet(raw_tweet):
+def make_tweet_text(raw_tweet: str) -> str:
     tweet = grammar_check(get_plain(raw_tweet))
     if not tweet[-1] in {'.', '!', '?'}:
         if tweet.endswith(','):
