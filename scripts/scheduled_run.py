@@ -8,7 +8,7 @@ from sleeping import print_sleep
 import augentbot
 
 
-def connect_run():
+def connect_run() -> None:
     os.system('git pull')
     reload(augentbot)
     augentbot.run_scheduled(create_buffers=1)
@@ -42,4 +42,3 @@ schedule.every().day.at('23:00').do(connect_run)
 while True:
     schedule.run_pending()
     print_sleep(3)
-    

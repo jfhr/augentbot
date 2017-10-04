@@ -1,23 +1,25 @@
 #! python3
 
 import datetime
+from typing import Iterable
+import _io
 
 
-def add_timestamp(entry):
+def add_timestamp(entry: str) -> str:
     timestamp = str(tuple(datetime.datetime.now().timetuple())[:6])
     timestamp = '{0}{1} '.format(' ' * (25 - len(timestamp)), timestamp)
     entry = entry.replace('\n', '\n'+timestamp)
     return timestamp + entry
 
 
-def remove_timestamp(entry):
+def remove_timestamp(entry: str) -> str:
     return entry[27:]
 
 
-def write_with_timestamps(file, entries):
+def write_with_timestamps(file: _io.TextIOWrapper, entries: Iterable[str]) -> None:
     for e in entries:
         file.write(add_timestamp(e))
 
 
-def read_wo_timestamps(entries):
+def read_wo_timestamps(entries: Iterable[str]) -> Iterable[str]:
     return [remove_timestamp(e) for e in entries]

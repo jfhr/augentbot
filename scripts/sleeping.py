@@ -3,7 +3,8 @@ from time import sleep
 
 # thanks to https://stackoverflow.com/a/5291044/8583511
 
-def print_sleep(seconds, length=3, prompt='Sleeping'):
+
+def print_sleep(seconds: int, length: int = 3, prompt: str = 'Sleeping') -> None:
     while True:
         for i in range(length):
             print(prompt + "." * i)
