@@ -6,7 +6,6 @@ import tweepy
 import datetime
 from pymarkovchain import MarkovChain
 from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
-import traceback
 from typing import Optional, Iterable
 import _io
 
@@ -43,7 +42,7 @@ def confirm(prompt: str = 'Confirm this action?') -> bool:
 def notify_me(text: str) -> None:
     """
     send a message to the user specified as HOST_NAME. Messages longer than 10000
-    characters will be split in submessages due to twitter limits
+    characters will be split in sub-messages due to twitter limits
     """
     for subtext in [text[i:i+10000] for i in range(0, len(text), 10000)]:
         try:
@@ -55,8 +54,7 @@ def notify_me(text: str) -> None:
 def log_info(entry: str,
              notify: bool = False,
              file: Optional[_io.TextIOWrapper] = None,
-             close_file: bool = True,
-             include_traceback: bool = False) -> None:
+             close_file: bool = True) -> None:
     """
     Attaches a timestamp with the current time to the entry,
     prints the entry and saves it in the log.txt file of the data directory.
@@ -64,8 +62,6 @@ def log_info(entry: str,
     user specified as HOST_NAME via twitter dm. This requires that the user
     has allowed receiving dms from this account
     """
-    if include_traceback:
-        entry += str(traceback.extract_stack())
     if file is None:
         file = open(os.path.join(DATA, "log.txt"), 'a')
     
@@ -205,7 +201,7 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
 
     tweets = []
     for i in range(count):
-        tweet = make_tweet(mc.generateString())
+        tweet = make_tweet_text(mc.generateString())
         log_info("Added tweet '{}'".format(tweet))
         tweets.append(tweet)
 
@@ -222,8 +218,8 @@ buffer.txt file, so it always contains a solid amount of tweets.
 
 
 def tweet_new(create_buffers: int = 0) -> None:
-    tweets = [make_tweet(t) for t in generate_tweets(count=1+create_buffers)]  # create a tweet and, if specified in
-    # function call, create additional tweets for the tweet buffer
+    tweets = [make_tweet_text(t) for t in generate_tweets(count=1+create_buffers)]  # create a tweet and, if specified
+    # in function call, create additional tweets for the tweet buffer
 
     api.update_status(tweets[0])
     
@@ -265,11 +261,11 @@ def run_scheduled(create_buffers: int = 0) -> None:
         process_new_tweets()
         tweet_new(create_buffers)
     except Exception as e:
-        log_info(str(e), notify=True, include_traceback=True)
+        log_info(str(e), notify=True)
         try:
             tweet_from_buffer()
         except Exception as e:
-            log_info('{} in buffer'.format(str(e)), notify=True, include_traceback=True)
+            log_info('{} in buffer'.format(str(e)), notify=True)
 
     
 if __name__ == '__main__':

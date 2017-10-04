@@ -1,3 +1,5 @@
+#! python3
+
 import language_check
 import re
 import os
