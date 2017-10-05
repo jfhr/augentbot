@@ -7,7 +7,6 @@ import language_check
 import tweepy
 
 IGNORED_USERS = ['_jfde', 'augentbot', 'augentbot_beta']
-ALLOWED_CHARS = """abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_@'"-<>?!/\\#., ()\n"""
 MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
 
@@ -35,19 +34,13 @@ def viable(tweet: tweepy.Status) -> bool:
     return (string != '') and (tweet.author.screen_name not in IGNORED_USERS)
 
 
-def augent_decode(string: str) -> str:
-    dec_string = ''.join([c if c in ALLOWED_CHARS else ' ' for c in string])
-    return dec_string
-
-
 def get_plain(string: str) -> str:
     string = re.sub(r'https://t.co/\S+', '', string)
     string = re.sub(r'.?@\w+[: ]', '', string)
     string = re.sub(r'[\n ]+', ' ', string)
     string = re.sub(r'^RT', ' ', string)
     string = re.sub(r'#\w+', '', string)
-    string = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!\/\\#., ():\n]''', ' ', string)
-    string = augent_decode(string)
+    string = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!/\\#., ():\n]''', ' ', string)
     string = string.strip()
     return string
 
