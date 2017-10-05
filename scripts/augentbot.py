@@ -226,8 +226,12 @@ except Exception as e:
 
 
 def tweet_new(create_buffers: int = 0) -> None:
-    tweets = [make_tweet_text(t) for t in generate_tweets(count=1+create_buffers)]  # create a tweet and, if specified
-    # in function call, create additional tweets for the tweet buffer
+    tweets = list()
+    for t in generate_tweets(count=1+create_buffers):
+        t_text = make_tweet_text(t)
+        if t_text:
+            tweets.append(t_text)
+            # create a tweet and, if specified in function call, create additional tweets for the tweet buffer
 
     api.update_status(tweets[0])
     
