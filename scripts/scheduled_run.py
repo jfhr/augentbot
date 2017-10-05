@@ -13,7 +13,8 @@ from sleeping import print_sleep
 def connect_run() -> None:
     os.system('git pull')
     if platform.system() == 'Windows':
-        os.system('chcp 65001')  # fixes encoding errors on windows
+        os.system('chcp 65001')
+        os.system('powershell')  # fixes encoding errors on windows
     reload(augentbot)
     augentbot.run(create_buffers=1)
 
