@@ -36,12 +36,26 @@ def viable(tweet: tweepy.Status) -> bool:
 
 def get_plain(string: str) -> str:
     string = re.sub(r'https://t.co/\S+', '', string)
+    # remove URLs. Since twitter uses an URL shortener, all URLs look like: "https://t.co/Amn4oTgxkD"
+
     string = re.sub(r'.?@\w+[: ]', '', string)
+    # remove mentions. Mentions look like "@_jfde" or "@_jfde:"
+
     string = re.sub(r'[\n ]+', ' ', string)
+    # remove newlines and multiple whitespaces
+
     string = re.sub(r'^RT', ' ', string)
-    string = re.sub(r'#\w+', '', string)
+    # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
+
+    # string = re.sub(r'#\w+', '', string)
+    # # remove hashtags. Example: "I really like #python!" where "#python" is changed to "python"
+    #  ^ experimentally disabled removing hashtags.
+
     string = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!/\\#., ():\n]''', ' ', string)
-    string = string.strip()
+    # remove special characters and emojis.
+
+    string = string.strip()  # remove whitespaces at the beginning or end of a tweet
+    string = grammar_check(string)  # improve the grammar of these lazy twitter users
     return string
 
 

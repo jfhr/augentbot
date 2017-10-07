@@ -202,9 +202,12 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
 
     tweets = []
     for i in range(count):
-        tweet = make_tweet_text(mc.generateString())
-        log_info("Added tweet '{}'".format(tweet))
-        tweets.append(tweet)
+        while True:
+            tweet = make_tweet_text(mc.generateString())
+            if tweet:
+                log_info("Added tweet '{}'".format(tweet))
+                tweets.append(tweet)
+                break
 
     return tweets
 
