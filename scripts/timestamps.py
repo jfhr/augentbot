@@ -16,6 +16,10 @@ def remove_timestamp(entry: str) -> str:
     return entry[27:]
 
 
+def get_timestamp(entry: str) -> str:
+    return entry[:27].strip()
+
+
 def write_with_timestamps(file: _io.TextIOWrapper, entries: Iterable[str]) -> None:
     for e in entries:
         file.write(add_timestamp(e))
@@ -23,3 +27,8 @@ def write_with_timestamps(file: _io.TextIOWrapper, entries: Iterable[str]) -> No
 
 def read_wo_timestamps(entries: Iterable[str]) -> Iterable[str]:
     return [remove_timestamp(e) for e in entries]
+
+
+def timetuple(entry: str) -> Iterable[str, datetime.datetime]:
+    time = datetime.datetime.strptime(get_timestamp(entry),  '(%Y, %m, %d, %H, %M, %S)')
+    return entry, time
