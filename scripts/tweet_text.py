@@ -2,7 +2,7 @@
 
 import re
 from math import sqrt
-from typing import Union
+from typing import Union, Optional
 
 import language_check
 import tweepy
@@ -20,50 +20,49 @@ def get_weight(tweet: tweepy.Status) -> int:
     return (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count)
 
 
-def viable(tweet: tweepy.Status) -> bool:
-    # Finds out if a tweet is allowed to be added to the database.
-    # Tweets are not allowed if they
-    #  - contain no text (e.g. pure picture tweets, or tweets that contain only URLs)
-    #  - come from an ignored user
-    o_string = tweet.text
-    string = get_plain(o_string)
+def get_viable_text(tweet: tweepy.Status) -> Optional[str]:
+    if tweet.author.screen_name in IGNORED_USERS:
+        return None
+    
+    string = get_plain_text(tweet.text)
 
-    return (string != '') and (tweet.author.screen_name not in IGNORED_USERS)
-
-
-def get_plain(string: str) -> str:
-    string = re.sub(r'https://t.co/\S+', '', string)
-    # remove URLs. Since twitter uses an URL shortener, all URLs look like: "https://t.co/Amn4oTgxkD"
-
-    string = re.sub(r'.?@\w+[: ]', '', string)
-    # remove mentions. Mentions look like "@_jfde" or "@_jfde:"
-
-    string = re.sub(r'[\n ]+', ' ', string)
-    # remove newlines and multiple whitespaces
-
-    string = re.sub(r'^RT', ' ', string)
-    # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
-
-    # string = re.sub(r'#\w+', '', string)
-    # # remove hashtags. Example: "I really like #python!" where "#python" is changed to "python"
-    #  ^ experimentally disabled removing hashtags.
-
-    string = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!/\\#., ():\n]''', ' ', string)
-    # remove special characters and emojis.
-
-    string = string.strip()  # remove whitespaces at the beginning or end of a tweet
-    string = grammar_check(string)  # improve the grammar of these lazy twitter users
+    if re.search('[a-zA-Z]', string) is None:
+        return None
+    
     return string
 
 
-def make_tweet_text(raw_tweet: str) -> Union[str, bool]:
-    tweet = grammar_check(get_plain(raw_tweet))
-    if not tweet[-1] in {'.', '!', '?'}:
-        if tweet.endswith(','):
-            tweet = tweet[:-1] + ','
-        else:
-            tweet += '.'
-    if len(tweet) <= 140:
+def get_plain_text(raw_tweet_text: str) -> str:
+    raw_tweet_text = re.sub(r'https://t.co/\S+', '', raw_tweet_text)
+    # remove URLs. Since twitter uses an URL shortener, all URLs look like: "https://t.co/Amn4oTgxkD"
+
+    raw_tweet_text = re.sub(r'.?@\w+[: ]', '', raw_tweet_text)
+    # remove mentions. Mentions look like "@_jfde" or "@_jfde:"
+
+    raw_tweet_text = re.sub(r'^RT @\w+: ', ' ', raw_tweet_text)
+    # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
+
+    # raw_tweet_text = re.sub(r'#\w+', '', raw_tweet_text)
+    # # remove hashtags. Example: "I really like #python!" where "#python" is changed to "python"
+    #  ^ experimentally disabled removing hashtags.
+
+    raw_tweet_text = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!/\\#., ():\n]''', ' ', raw_tweet_text)
+    # remove special characters and emojis.
+
+    raw_tweet_text = re.sub(r'[\n ]+', ' ', raw_tweet_text)
+    # remove newlines and multiple whitespaces
+    
+    raw_tweet_text = raw_tweet_text.strip()  # remove whitespaces at the beginning or end of a tweet
+    raw_tweet_text = grammar_check(raw_tweet_text)  # improve the grammar of these lazy twitter users
+    
+    return raw_tweet_text
+
+
+def make_tweet_text(raw_tweet_text: str) -> Union[str, bool]:
+    tweet = grammar_check(get_plain_text(raw_tweet_text))
+    if not tweet[-1] in {'.', '!', '?', ','}:
+        tweet += '.'
+    if 0 < len(tweet) <= 140:
         return tweet
     else:
         return False
@@ -72,4 +71,4 @@ def make_tweet_text(raw_tweet: str) -> Union[str, bool]:
 if __name__ == '__main__':
     # run tests
 
-    print(get_plain(r"""@123 https://t.co/f3g foo @_12jfde   bar"""))
+    print(get_plain_text(r"""@123 https://t.co/f3g foo @_12jfde   bar"""))

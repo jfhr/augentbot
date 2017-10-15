@@ -128,12 +128,13 @@ def process_new_tweets() -> None:
     log_file = open(os.path.join(DATA, 'log.txt'), 'a')  # don't open and close files for every data/logging entry
 
     def process_tweet(tweet):
-        if tweet_text.viable(tweet):
-            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_text.get_plain(tweet.text)))
-            add_data(tweet_text.get_plain(tweet.text), tweet_text.get_weight(tweet))
+        tweet_value = tweet_text.get_viable_text(tweet)
+        if tweet_value:
+            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value))
+            add_data(tweet_value, tweet_text.get_weight(tweet))
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable"
-                     .format(tweet.author.screen_name, tweet_text.get_plain(tweet.text)))
+                     .format(tweet.author.screen_name, tweet.text))
 
     for t in tweepy.Cursor(api.home_timeline).items():
         if t.created_at > datetime.datetime.now() - datetime.timedelta(days=7):
