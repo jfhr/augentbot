@@ -3,4 +3,5 @@ PyMarkovChain
 tweepy
 language-check
 nltk
-# also requires java runtime environment for the language checking.
+# Also requires Java runtime environment for the language checking.
+# Tests shown it works with Java 8, but not Java 9.

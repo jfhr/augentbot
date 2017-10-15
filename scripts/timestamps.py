@@ -29,6 +29,6 @@ def read_wo_timestamps(entries: Iterable[str]) -> Iterable[str]:
     return [remove_timestamp(e) for e in entries]
 
 
-def timetuple(entry: str) -> Iterable[str, datetime.datetime]:
+def timetuple(entry: str):
     time = datetime.datetime.strptime(get_timestamp(entry),  '(%Y, %m, %d, %H, %M, %S)')
     return entry, time

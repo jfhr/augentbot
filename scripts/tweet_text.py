@@ -2,6 +2,7 @@
 
 import re
 from math import sqrt
+from typing import Union
 
 import language_check
 import tweepy
@@ -16,11 +17,7 @@ def grammar_check(text: str) -> str:
 
 
 def get_weight(tweet: tweepy.Status) -> int:
-    r = tweet.retweet_count
-    f = tweet.favorite_count
-    p = tweet.author.followers_count
-
-    return (r*5 + f)/sqrt(p)
+    return (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count)
 
 
 def viable(tweet: tweepy.Status) -> bool:
@@ -59,7 +56,7 @@ def get_plain(string: str) -> str:
     return string
 
 
-def make_tweet_text(raw_tweet: str) -> str:
+def make_tweet_text(raw_tweet: str) -> Union[str, bool]:
     tweet = grammar_check(get_plain(raw_tweet))
     if not tweet[-1] in {'.', '!', '?'}:
         if tweet.endswith(','):

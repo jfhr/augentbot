@@ -7,11 +7,10 @@ import platform
 from typing import Optional, Iterable
 
 import tweepy
-from nltk.corpus import gutenberg, udhr, webtext, twitter_samples
 from pymarkovchain import MarkovChain
 
-from timestamps import read_wo_timestamps, add_timestamp
-from tweet_text import make_tweet_text, get_plain, viable, get_weight, IGNORED_USERS
+import timestamps
+import tweet_text
 
 TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
                                          'twitter_consumer_key')).read()
@@ -66,7 +65,7 @@ def log_info(entry: str,
     if file is None:
         file = open(os.path.join(DATA, "log.txt"), 'a')
     
-    file.write(add_timestamp(entry) + '\n')
+    file.write(timestamps.add_timestamp(entry) + '\n')
     print(entry)
     if notify:
         notify_me(entry)
@@ -80,7 +79,7 @@ def add_data(entry: str, weight: int = 1, file: Optional[_io.TextIOWrapper] = No
         file = open(os.path.join(DATA, 'data.txt'), 'a')
 
     for i in range(weight):
-        file.write(add_timestamp(entry) + '\n')
+        file.write(timestamps.add_timestamp(entry) + '\n')
     
     if close_file:
         file.close()
@@ -91,7 +90,7 @@ def followback() -> None:
     # follow back
     followings = [following.screen_name for following in tweepy.Cursor(api.friends).items()]
     for follower in followers:
-        if follower not in followings + IGNORED_USERS:
+        if follower not in followings + tweet_text.IGNORED_USERS:
             try:
                 api.create_friendship(follower)
                 log_info('followed @{0}'.format(follower))
@@ -103,7 +102,7 @@ def followback() -> None:
 
     # unfollow back
     for following in followings:
-        if following not in followers + IGNORED_USERS:
+        if following not in followers + tweet_text.IGNORED_USERS:
             try:
                 api.destroy_friendship(following)
                 log_info('unfollowed @{0}'.format(following))
@@ -116,45 +115,6 @@ def followback() -> None:
 
 """ experimentally disabled this extensive method. Current active method is simply processing every tweet 
 that isn't older than 7 days."""
-# def process_new_tweets():
-#     """
-#     Gets new tweets from the augentbot home timeline, checks every tweet for viability, and adds that tweet to
-#     the data log. If a tweet has a high weight (many likes and retweets compared to the author's follower count),
-#     it is being added more often.
-#     Only tweets older than 2 days are being processed. To make sure each tweet isn't being processed more than once,
-#     the id of the youngest tweet that has been processed is being stored during every run.
-#     """
-
-#     with open(os.path.join(DATA, '_lastid.txt')) as file:
-#         last_id = int(file.read())
-  
-#     last_id_file = open(os.path.join(DATA, '_lastid.txt'), 'w')
-
-#     def process_tweet(t):
-#         if viable(t):
-#             log_info("Processing tweet {0}: '{1}' ... viable".format(t.author.screen_name, get_plain(t.text)))
-#             add_data(get_plain(t.text), get_weight(t))
-#         else:
-#             log_info("Processing tweet {0}: '{1}' ... not viable".format(t.author.screen_name, get_plain(t.text)))
-
-#     def close(last_id, reason=None, notify_me=False):
-#         if reason is not None:
-#             log_info(reason, notify_me)
-#         last_id_file.write(str(last_id))
-#         last_id_file.close()
-#         return
-    
-#     for t in tweepy.Cursor(api.home_timeline).items():
-#         # skip tweets that aren't older than two days
-#         if t.created_at > datetime.datetime.now() - datetime.timedelta(days=2):
-#             continue
-#         # if a tweet is older than the youngest tweet processed last time, end the execution
-#         if t.id <= last_id:
-#             close(t.id, 'All tweets processed.')
-#             return
-        
-#         else:
-#             process_tweet(t)
 
 
 def process_new_tweets() -> None:
@@ -168,12 +128,12 @@ def process_new_tweets() -> None:
     log_file = open(os.path.join(DATA, 'log.txt'), 'a')  # don't open and close files for every data/logging entry
 
     def process_tweet(tweet):
-        if viable(tweet):
-            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, get_plain(tweet.text)))
-            add_data(get_plain(tweet.text), get_weight(tweet))
+        if tweet_text.viable(tweet):
+            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_text.get_plain(tweet.text)))
+            add_data(tweet_text.get_plain(tweet.text), tweet_text.get_weight(tweet))
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable"
-                     .format(tweet.author.screen_name, get_plain(tweet.text)))
+                     .format(tweet.author.screen_name, tweet_text.get_plain(tweet.text)))
 
     for t in tweepy.Cursor(api.home_timeline).items():
         if t.created_at > datetime.datetime.now() - datetime.timedelta(days=7):
@@ -187,23 +147,15 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
     if mc is None:
         mc = MarkovChain()
 
-        base_corpus = ''
-        base_corpus += webtext.raw()
-        base_corpus += gutenberg.raw()
-        base_corpus += udhr.raw('English-Latin1')
-
-        twitter_samples_list = twitter_samples.strings()
-        base_corpus += '\n'.join([get_plain(t) for t in twitter_samples_list])
-
         with open(os.path.join(DATA, "data.txt")) as file:
-            collected_data = '\n'.join(read_wo_timestamps(file.readlines()))
+            collected_data = '\n'.join(timestamps.read_wo_timestamps(file.readlines()))
 
-        mc.generateDatabase(base_corpus + collected_data)
+        mc.generateDatabase(collected_data)
 
     tweets = []
     for i in range(count):
         while True:
-            tweet = make_tweet_text(mc.generateString())
+            tweet = tweet_text.make_tweet_text(mc.generateString())
             if tweet:
                 log_info("Added tweet '{}'".format(tweet))
                 tweets.append(tweet)
@@ -231,7 +183,7 @@ except Exception as e:
 def tweet_new(create_buffers: int = 0) -> None:
     tweets = list()
     for t in generate_tweets(count=1+create_buffers):
-        t_text = make_tweet_text(t)
+        t_text = tweet_text.make_tweet_text(t)
         if t_text:
             tweets.append(t_text)
             # create a tweet and, if specified in function call, create additional tweets for the tweet buffer
