@@ -193,7 +193,7 @@ def tweet_new(create_buffers: int = 0) -> None:
     
     if create_buffers:
         with open(os.path.join(DATA, 'buffer.txt'), 'a') as file:
-            file.write('\n'.join(tweets[1:]))
+            file.write('\n' + '\n'.join(tweets[1:]))
 
 
 def tweet_from_buffer() -> None:

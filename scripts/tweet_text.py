@@ -51,7 +51,7 @@ def get_plain_text(raw_tweet_text: str) -> str:
 
     raw_tweet_text = re.sub(r'[\n ]+', ' ', raw_tweet_text)
     # remove newlines and multiple whitespaces
-    
+
     raw_tweet_text = raw_tweet_text.strip()  # remove whitespaces at the beginning or end of a tweet
     raw_tweet_text = grammar_check(raw_tweet_text)  # improve the grammar of these lazy twitter users
     
