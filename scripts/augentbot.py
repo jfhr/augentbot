@@ -113,10 +113,6 @@ def followback() -> None:
                 log_info("Couldn't follow @{0}".format(following))
 
 
-""" experimentally disabled this extensive method. Current active method is simply processing every tweet 
-that isn't older than 7 days."""
-
-
 def process_new_tweets() -> None:
     """
     Gets new tweets from the augentbot home timeline, checks every tweet for viability, and adds that tweet to
@@ -130,11 +126,11 @@ def process_new_tweets() -> None:
     def process_tweet(tweet):
         tweet_value = tweet_text.get_viable_text(tweet)
         if tweet_value:
-            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value))
-            add_data(tweet_value, tweet_text.get_weight(tweet))
+            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value), file=log_file, close_file=False)
+            add_data(tweet_value, tweet_text.get_weight(tweet), file=data_file, close_file=False)
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable"
-                     .format(tweet.author.screen_name, tweet.text))
+                     .format(tweet.author.screen_name, tweet.text), file=log_file, close_file=False)
 
     for t in tweepy.Cursor(api.home_timeline).items():
         if t.created_at > datetime.datetime.now() - datetime.timedelta(days=7):
@@ -151,7 +147,7 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
         with open(os.path.join(DATA, "data.txt")) as file:
             collected_data = '\n'.join(timestamps.read_wo_timestamps(file.readlines()))
 
-        mc.generateDatabase(collected_data)
+        mc.generateDatabase(collected_data, n=5)
 
     tweets = []
     for i in range(count):
