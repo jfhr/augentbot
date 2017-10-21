@@ -7,7 +7,7 @@ from typing import Union, Optional
 import language_check
 import tweepy
 
-IGNORED_USERS = ['_jfde', 'augentbot', 'augentbot_beta']
+IGNORED_USERS = []
 MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
 
@@ -35,12 +35,14 @@ def get_viable_text(tweet: tweepy.Status) -> Optional[str]:
 
 def get_plain_text(raw_tweet_text: str) -> str:
     raw_tweet_text = re.sub(r'https://t.co/\S+', '', raw_tweet_text)
+    raw_tweet_text = re.sub(r'http://t.co/\S+', '', raw_tweet_text)
     # remove URLs. Since twitter uses an URL shortener, all URLs look like: "https://t.co/Amn4oTgxkD"
+    # except URLs from tweets longer ago, these might still look like "http://t.co\Amn4oTgxkD"
 
     raw_tweet_text = re.sub(r'.?@\w+[: ]', '', raw_tweet_text)
     # remove mentions. Mentions look like "@_jfde" or "@_jfde:"
 
-    raw_tweet_text = re.sub(r'^RT @\w+: ', ' ', raw_tweet_text)
+    raw_tweet_text = re.sub(r'^RT @\w+: ', '', raw_tweet_text)
     # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
 
     # raw_tweet_text = re.sub(r'#\w+', '', raw_tweet_text)
