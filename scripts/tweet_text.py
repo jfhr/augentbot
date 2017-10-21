@@ -16,12 +16,12 @@ def grammar_check(text: str) -> str:
     return language_check.correct(text, lt.check(text))
 
 
-def get_weight(tweet: tweepy.Status) -> int:
+def get_weight(tweet: tweepy.models.Status) -> int:
     precise_weight = (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count)
     return int(precise_weight)
 
 
-def get_viable_text(tweet: tweepy.Status) -> Optional[str]:
+def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
     if tweet.author.screen_name in IGNORED_USERS:
         return None
     

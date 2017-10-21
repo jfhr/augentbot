@@ -24,7 +24,9 @@ TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augent
 HOST_NAME = '_jfde'
 
 DATA = os.path.join(os.path.expanduser('~'), 'augentbot', 'data')
-CORPUS  = os.path.join(os.path.expanduser('~'), 'augentbot', 'corpus')
+CORPUS = os.path.join(os.path.expanduser('~'), 'augentbot', 'corpus')
+
+TWEET_PROCESSING_LIMIT = 100
 
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
@@ -133,7 +135,7 @@ def process_new_tweets() -> None:
             log_info("Processing tweet {0}: '{1}' ... not viable"
                      .format(tweet.author.screen_name, tweet.text), file=log_file, close_file=False)
 
-    for t in tweepy.Cursor(api.home_timeline).items():
+    for t in tweepy.Cursor(api.home_timeline, count=TWEET_PROCESSING_LIMIT).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             data_file.close()
             log_file.close()
