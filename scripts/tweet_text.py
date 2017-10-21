@@ -17,7 +17,8 @@ def grammar_check(text: str) -> str:
 
 
 def get_weight(tweet: tweepy.Status) -> int:
-    return (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count)
+    precise_weight = (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count)
+    return int(precise_weight)
 
 
 def get_viable_text(tweet: tweepy.Status) -> Optional[str]:
