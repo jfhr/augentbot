@@ -24,6 +24,7 @@ TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augent
 HOST_NAME = '_jfde'
 
 DATA = os.path.join(os.path.expanduser('~'), 'augentbot', 'data')
+CORPUS  = os.path.join(os.path.expanduser('~'), 'augentbot', 'corpus')
 
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
@@ -133,7 +134,7 @@ def process_new_tweets() -> None:
                      .format(tweet.author.screen_name, tweet.text), file=log_file, close_file=False)
 
     for t in tweepy.Cursor(api.home_timeline).items():
-        if t.created_at > datetime.datetime.now() - datetime.timedelta(days=7):
+        if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             data_file.close()
             log_file.close()
             return
@@ -144,6 +145,14 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
     if mc is None:
         mc = MarkovChain()
 
+        # using a corpus of predefined data
+        corpus_data = str()
+        with open(os.path.join(CORPUS, "udhr.txt")) as file:
+            corpus_data += file.read()
+        with open(os.path.join(CORPUS, "twitter_samples.txt")) as file:
+            corpus_data += file.read()
+
+        # adding the collected data from other twitter users
         with open(os.path.join(DATA, "data.txt")) as file:
             collected_data = '\n'.join(timestamps.read_wo_timestamps(file.readlines()))
 
