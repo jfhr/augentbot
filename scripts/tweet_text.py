@@ -18,7 +18,11 @@ def grammar_check(text: str) -> str:
 
 def get_weight(tweet: tweepy.models.Status) -> int:
     precise_weight = (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count)
-    return int(precise_weight)
+    limited_weight = min(precise_weight, 25)
+    # limit the weight of a single tweet to 25 \
+    # to avoid being 'overrun' by one viral tweet
+
+    return int(limited_weight)
 
 
 def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:

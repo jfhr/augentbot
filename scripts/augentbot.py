@@ -129,7 +129,8 @@ def process_new_tweets() -> None:
     def process_tweet(tweet):
         tweet_value = tweet_text.get_viable_text(tweet)
         if tweet_value:
-            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value), file=log_file, close_file=False)
+            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value),
+                     file=log_file, close_file=False)
             add_data(tweet_value, tweet_text.get_weight(tweet), file=data_file, close_file=False)
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable"
