@@ -46,7 +46,7 @@ def get_plain_text(raw_tweet_text: str) -> str:
     raw_tweet_text = re.sub(r'.?@\w+[: ]', '', raw_tweet_text)
     # remove mentions. Mentions look like "@_jfde" or "@_jfde:"
 
-    raw_tweet_text = re.sub(r'^RT @\w+: ', '', raw_tweet_text)
+    raw_tweet_text = re.sub(r'^RT', '', raw_tweet_text)
     # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
 
     # raw_tweet_text = re.sub(r'#\w+', '', raw_tweet_text)
@@ -77,5 +77,4 @@ def make_tweet_text(raw_tweet_text: str) -> Union[str, bool]:
 
 if __name__ == '__main__':
     # run tests
-
-    print(get_plain_text(r"""@123 https://t.co/f3g foo @_12jfde   bar"""))
+    print(get_plain_text(r"@123 https://t.co/f3g Definitely important infomration! @_12jfde   \n "))
