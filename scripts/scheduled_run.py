@@ -7,7 +7,6 @@ from importlib import reload
 import schedule
 
 import augentbot
-from sleeping import print_sleep
 
 
 def connect_run() -> None:
@@ -45,4 +44,3 @@ schedule.every().day.at('23:00').do(connect_run)
 
 while True:
     schedule.run_pending()
-    print_sleep(3)
