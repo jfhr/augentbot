@@ -124,7 +124,8 @@ def process_new_tweets() -> None:
     If a tweet older than 7 days is encountered, the method is being returned.
     """
     data_file = open(os.path.join(DATA, 'data.txt'), 'a')
-    log_file = open(os.path.join(DATA, 'log.txt'), 'a', encoding="utf-8")  # don't open and close files for every data/logging entry
+    log_file = open(os.path.join(DATA, 'log.txt'), 'a', encoding="utf-8")
+    # don't open and close files for every data/logging entry
 
     def process_tweet(tweet):
         tweet_value = tweet_text.get_viable_text(tweet)

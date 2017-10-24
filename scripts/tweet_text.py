@@ -12,12 +12,15 @@ MY_NAME = 'augentbot'
 lt = language_check.LanguageTool('en-US')
 
 
-def grammar_check(text: str) -> str:
-    return language_check.correct(text, lt.check(text))
+def grammar_check(text: str) -> Union[str, bool]:
+    text = language_check.correct(text, lt.check(text))
+    if len(lt.check(text)) > 0:
+        return False
+    return text
 
 
 def get_weight(tweet: tweepy.models.Status) -> int:
-    precise_weight = (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count)
+    precise_weight = (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count) + 1
     limited_weight = min(precise_weight, 25)
     # limit the weight of a single tweet to 25 \
     # to avoid being 'overrun' by one viral tweet
@@ -31,7 +34,7 @@ def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
     
     string = get_plain_text(tweet.text)
 
-    if re.search('[a-zA-Z]', string) is None:
+    if (not string) or (re.search('[a-zA-Z]', string) is None):
         return None
     
     return string
@@ -60,9 +63,7 @@ def get_plain_text(raw_tweet_text: str) -> str:
     # remove newlines and multiple whitespaces
 
     raw_tweet_text = raw_tweet_text.strip()  # remove whitespaces at the beginning or end of a tweet
-    raw_tweet_text = grammar_check(raw_tweet_text)  # improve the grammar of these lazy twitter users
-    
-    return raw_tweet_text
+    return grammar_check(raw_tweet_text)     # improve the grammar of these lazy twitter users
 
 
 def make_tweet_text(raw_tweet_text: str) -> Union[str, bool]:
