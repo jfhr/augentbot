@@ -26,7 +26,7 @@ HOST_NAME = '_jfde'
 DATA = os.path.join(os.path.expanduser('~'), 'augentbot', 'data')
 CORPUS = os.path.join(os.path.expanduser('~'), 'augentbot', 'corpus')
 
-TWEET_PROCESSING_LIMIT = 100
+TWEET_PROCESSING_LIMIT = 200
 
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
@@ -77,17 +77,6 @@ def log_info(entry: str,
         file.close()
 
 
-def add_data(entry: str, weight: int = 1, file: Optional[_io.TextIOWrapper] = None, close_file: bool = True) -> None:
-    if file is None:
-        file = open(os.path.join(DATA, 'data.txt'), 'a')
-
-    for i in range(weight):
-        file.write(timestamps.add_timestamp(entry) + '\n')
-    
-    if close_file:
-        file.close()
-
-
 def followback() -> None:
     followers = [follower.screen_name for follower in tweepy.Cursor(api.followers).items()]
     # follow back
@@ -132,17 +121,21 @@ def process_new_tweets() -> None:
         if tweet_value:
             log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value),
                      file=log_file, close_file=False)
-            add_data(tweet_value, tweet_text.get_weight(tweet), file=data_file, close_file=False)
+            for i in range(tweet_text.get_weight(tweet)):
+                data_file.write(tweet_value)
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable"
                      .format(tweet.author.screen_name, tweet.text), file=log_file, close_file=False)
 
-    for t in tweepy.Cursor(api.home_timeline, count=TWEET_PROCESSING_LIMIT).items():
+    for t in tweepy.Cursor(api.user_timeline, count=168).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             data_file.close()
             log_file.close()
             return
         process_tweet(t)
+    data_file.close()
+    log_file.close()
+    return
 
 
 def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterable[str]:
@@ -151,16 +144,14 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
 
         # using a corpus of predefined data
         corpus_data = str()
-        with open(os.path.join(CORPUS, "udhr.txt")) as file:
-            corpus_data += file.read()
-        with open(os.path.join(CORPUS, "twitter_samples.txt")) as file:
+        with open(os.path.join(DATA, "corpus.txt")) as file:
             corpus_data += file.read()
 
         # adding the collected data from other twitter users
         with open(os.path.join(DATA, "data.txt")) as file:
-            collected_data = '\n'.join(timestamps.read_wo_timestamps(file.readlines()))
+            collected_data = file.read()
 
-        mc.generateDatabase(collected_data, n=5)
+        mc.generateDatabase(corpus_data+collected_data, n=5)
 
     tweets = []
     for i in range(count):
