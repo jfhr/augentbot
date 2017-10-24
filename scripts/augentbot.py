@@ -24,9 +24,6 @@ TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augent
 HOST_NAME = '_jfde'
 
 DATA = os.path.join(os.path.expanduser('~'), 'augentbot', 'data')
-CORPUS = os.path.join(os.path.expanduser('~'), 'augentbot', 'corpus')
-
-TWEET_PROCESSING_LIMIT = 200
 
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
@@ -143,9 +140,8 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
         mc = MarkovChain()
 
         # using a corpus of predefined data
-        corpus_data = str()
         with open(os.path.join(DATA, "corpus.txt")) as file:
-            corpus_data += file.read()
+            corpus_data = file.read()
 
         # adding the collected data from other twitter users
         with open(os.path.join(DATA, "data.txt")) as file:

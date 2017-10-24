@@ -8,7 +8,7 @@ import language_check
 import tweepy
 
 IGNORED_USERS = []
-MY_NAME = 'augentbot'
+
 lt = language_check.LanguageTool('en-US')
 
 
