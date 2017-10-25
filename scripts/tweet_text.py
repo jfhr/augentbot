@@ -38,7 +38,7 @@ def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
 
 
 def get_plain_text(raw_tweet_text: str) -> str:
-    raw_tweet_text = re.sub(r'https://t.co/\S+', '', raw_tweet_text)
+    raw_tweet_text = re.sub(r'https{0,1}://t.co/\S+', '', raw_tweet_text)
     raw_tweet_text = re.sub(r'http://t.co/\S+', '', raw_tweet_text)
     # remove URLs. Since twitter uses an URL shortener, all URLs look like: "https://t.co/Amn4oTgxkD"
     # except URLs from tweets longer ago, these might still look like "http://t.co/Amn4oTgxkD"
@@ -49,12 +49,8 @@ def get_plain_text(raw_tweet_text: str) -> str:
     raw_tweet_text = re.sub(r'^RT', '', raw_tweet_text)
     # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
 
-    # raw_tweet_text = re.sub(r'#\w+', '', raw_tweet_text)
-    # # remove hashtags. Example: "I really like #python!" where "#python" is changed to "python"
-    #  ^ experimentally disabled removing hashtags.
-
-    raw_tweet_text = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!/\\#., ():\n]''', ' ', raw_tweet_text)
-    # remove special characters and emojis.
+    raw_tweet_text = re.sub(r'#\w+', '', raw_tweet_text)
+    # remove hashtags. Example: "I really like #python!" where "#python" is changed to "python"
 
     raw_tweet_text = re.sub(r'[\n ]+', ' ', raw_tweet_text)
     # remove newlines and multiple whitespaces
