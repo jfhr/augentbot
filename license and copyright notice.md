@@ -271,7 +271,8 @@ Full license text:
     
     I. SOURCE CODE. Software may contain source code that, unless expressly licensed for other purposes, is provided solely for reference purposes pursuant to the terms of this Agreement. Source code may not be redistributed unless expressly provided for in this Agreement.
 
-    J. THIRD PARTY CODE. Additional copyright notices and license terms applicable to portions of the Software are set forth in the Java SE LIUM accessible at http://www.oracle.com/technetwork/java/javase/documentation/index.html. In addition to any terms and conditions of any third party opensource/freeware license identified in the Java SE LIUM, the disclaimer of warranty and limitation of liability provisions in paragraphs 4 and 5 of the Binary Code License Agreement shall apply to all Software in this distribution.
+
+J. THIRD PARTY CODE. Additional copyright notices and license terms applicable to portions of the Software are set forth in the Java SE LIUM accessible at http://www.oracle.com/technetwork/java/javase/documentation/index.html. In addition to any terms and conditions of any third party opensource/freeware license identified in the Java SE LIUM, the disclaimer of warranty and limitation of liability provisions in paragraphs 4 and 5 of the Binary Code License Agreement shall apply to all Software in this distribution.
 
     K. TERMINATION FOR INFRINGEMENT. Either party may terminate this Agreement immediately should any Software become, or in either party's opinion be likely to become, the subject of a claim of infringement of any intellectual property right.
 
@@ -288,7 +289,9 @@ Full license text:
 This project uses a corpus of close to 800000 english sentences, taken from the Tatoeba project: http://downloads.tatoeba.org/exports/sentences.tar.bz2
 These sentences are distributed under the following terms of use: https://tatoeba.org/eng/terms_of_use
 They are distributed under the CC-BY license: https://creativecommons.org/licenses/by/2.0/
+
 Full license text:
+
     THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW IS PROHIBITED. 
     BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH TERMS AND CONDITIONS. 
     1. Definitions 
