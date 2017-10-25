@@ -24,9 +24,6 @@ TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augent
 HOST_NAME = '_jfde'
 
 DATA = os.path.join(os.path.expanduser('~'), 'augentbot', 'data')
-CORPUS = os.path.join(os.path.expanduser('~'), 'augentbot', 'corpus')
-
-TWEET_PROCESSING_LIMIT = 100
 
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
@@ -66,23 +63,12 @@ def log_info(entry: str,
     has allowed receiving dms from this account
     """
     if file is None:
-        file = open(os.path.join(DATA, "log.txt"), 'a')
+        file = open(os.path.join(DATA, "log.txt"), 'a', encoding='utf-8')
     
     file.write(timestamps.add_timestamp(entry) + '\n')
     print(entry)
     if notify:
         notify_me(entry)
-    
-    if close_file:
-        file.close()
-
-
-def add_data(entry: str, weight: int = 1, file: Optional[_io.TextIOWrapper] = None, close_file: bool = True) -> None:
-    if file is None:
-        file = open(os.path.join(DATA, 'data.txt'), 'a')
-
-    for i in range(weight):
-        file.write(timestamps.add_timestamp(entry) + '\n')
     
     if close_file:
         file.close()
@@ -123,8 +109,8 @@ def process_new_tweets() -> None:
     it is being added more often.
     If a tweet older than 7 days is encountered, the method is being returned.
     """
-    data_file = open(os.path.join(DATA, 'data.txt'), 'a')
-    log_file = open(os.path.join(DATA, 'log.txt'), 'a', encoding="utf-8")
+    data_file = open(os.path.join(DATA, 'data.txt'), 'a', encoding='utf-8')
+    log_file = open(os.path.join(DATA, 'log.txt'), 'a', encoding='utf-8')
     # don't open and close files for every data/logging entry
 
     def process_tweet(tweet):
@@ -132,17 +118,21 @@ def process_new_tweets() -> None:
         if tweet_value:
             log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value),
                      file=log_file, close_file=False)
-            add_data(tweet_value, tweet_text.get_weight(tweet), file=data_file, close_file=False)
+            for i in range(tweet_text.get_weight(tweet)):
+                data_file.write(tweet_value)
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable"
                      .format(tweet.author.screen_name, tweet.text), file=log_file, close_file=False)
 
-    for t in tweepy.Cursor(api.home_timeline, count=TWEET_PROCESSING_LIMIT).items():
+    for t in tweepy.Cursor(api.user_timeline, count=168).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             data_file.close()
             log_file.close()
             return
         process_tweet(t)
+    data_file.close()
+    log_file.close()
+    return
 
 
 def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterable[str]:
@@ -150,17 +140,14 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
         mc = MarkovChain()
 
         # using a corpus of predefined data
-        corpus_data = str()
-        with open(os.path.join(CORPUS, "udhr.txt")) as file:
-            corpus_data += file.read()
-        with open(os.path.join(CORPUS, "twitter_samples.txt")) as file:
-            corpus_data += file.read()
+        with open(os.path.join(DATA, "corpus.txt"), encoding='utf-8') as file:
+            corpus_data = file.read()
 
         # adding the collected data from other twitter users
-        with open(os.path.join(DATA, "data.txt")) as file:
-            collected_data = '\n'.join(timestamps.read_wo_timestamps(file.readlines()))
+        with open(os.path.join(DATA, "data.txt"), encoding='utf-8') as file:
+            collected_data = file.read()
 
-        mc.generateDatabase(collected_data, n=5)
+        mc.generateDatabase(corpus_data+collected_data, n=5)
 
     tweets = []
     for i in range(count):
@@ -201,17 +188,17 @@ def tweet_new(create_buffers: int = 0) -> None:
     api.update_status(tweets[0])
     
     if create_buffers:
-        with open(os.path.join(DATA, 'buffer.txt'), 'a') as file:
+        with open(os.path.join(DATA, 'buffer.txt'), 'a', encoding='utf-8') as file:
             file.write('\n' + '\n'.join(tweets[1:]))
 
 
 def tweet_from_buffer() -> None:
-    with open(os.path.join(DATA, 'buffer.txt')) as file:
+    with open(os.path.join(DATA, 'buffer.txt'), encoding='utf-8') as file:
         buffer = file.readlines()
 
     api.update_status(buffer.pop())
 
-    with open(os.path.join(DATA, 'buffer.txt'), 'w') as file:
+    with open(os.path.join(DATA, 'buffer.txt'), 'w', encoding='utf-8') as file:
         file.write(''.join(buffer)[:-1])  # remove newline at end of file
 
 

@@ -8,7 +8,7 @@ import language_check
 import tweepy
 
 IGNORED_USERS = []
-MY_NAME = 'augentbot'
+
 lt = language_check.LanguageTool('en-US')
 
 
@@ -21,17 +21,14 @@ def grammar_check(text: str) -> Union[str, bool]:
 
 def get_weight(tweet: tweepy.models.Status) -> int:
     precise_weight = (tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count) + 1
-    limited_weight = min(precise_weight, 25)
-    # limit the weight of a single tweet to 25 \
+    limited_weight = min(precise_weight, 20)
+    # limit the weight of a single tweet to 20 \
     # to avoid being 'overrun' by one viral tweet
 
     return int(limited_weight)
 
 
 def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
-    if tweet.author.screen_name in IGNORED_USERS:
-        return None
-    
     string = get_plain_text(tweet.text)
 
     if (not string) or (re.search('[a-zA-Z]', string) is None):
@@ -41,10 +38,10 @@ def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
 
 
 def get_plain_text(raw_tweet_text: str) -> str:
-    raw_tweet_text = re.sub(r'https://t.co/\S+', '', raw_tweet_text)
+    raw_tweet_text = re.sub(r'https{0,1}://t.co/\S+', '', raw_tweet_text)
     raw_tweet_text = re.sub(r'http://t.co/\S+', '', raw_tweet_text)
     # remove URLs. Since twitter uses an URL shortener, all URLs look like: "https://t.co/Amn4oTgxkD"
-    # except URLs from tweets longer ago, these might still look like "http://t.co\Amn4oTgxkD"
+    # except URLs from tweets longer ago, these might still look like "http://t.co/Amn4oTgxkD"
 
     raw_tweet_text = re.sub(r'.?@\w+[: ]', '', raw_tweet_text)
     # remove mentions. Mentions look like "@_jfde" or "@_jfde:"
@@ -52,12 +49,8 @@ def get_plain_text(raw_tweet_text: str) -> str:
     raw_tweet_text = re.sub(r'^RT', '', raw_tweet_text)
     # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
 
-    # raw_tweet_text = re.sub(r'#\w+', '', raw_tweet_text)
-    # # remove hashtags. Example: "I really like #python!" where "#python" is changed to "python"
-    #  ^ experimentally disabled removing hashtags.
-
-    raw_tweet_text = re.sub(r'''[^a-zA-Z0-9_@'\"\-<>?!/\\#., ():\n]''', ' ', raw_tweet_text)
-    # remove special characters and emojis.
+    raw_tweet_text = re.sub(r'#\w+', '', raw_tweet_text)
+    # remove hashtags. Example: "I really like #python!" where "#python" is changed to "python"
 
     raw_tweet_text = re.sub(r'[\n ]+', ' ', raw_tweet_text)
     # remove newlines and multiple whitespaces
