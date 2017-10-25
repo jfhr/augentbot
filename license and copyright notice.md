@@ -1,13 +1,13 @@
-#Copyright note
+# Copyright note
 
-##my profile picture
+## my profile picture
 source: https://commons.wikimedia.org/wiki/File:Eye_of_Horus.svg
 authors: https://commons.wikimedia.org/wiki/User:Hendrike, https://commons.wikimedia.org/wiki/User:Erin_Silversmith
 copyright notice:
     "Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
     This file is licensed under the Creative Commons Attribution-Share Alike 3.0 Unported license."
 
-##my header picture
+## my header picture
 source: https://commons.wikimedia.org/wiki/File:Horus_as_falcon.svg
 author: https://commons.wikimedia.org/wiki/User:Jeff_Dahl
 copyright notice: 
@@ -28,8 +28,8 @@ copyright notice:
 
     You may select the license of your choice."
 
-#Software license information
-##Pymarkovchain
+# Software license information
+## Pymarkovchain
 The python pymarkovchain library was taken from: https://pypi.python.org/pypi/PyMarkovChain/
 It is distributed under the following license: https://github.com/TehMillhouse/PyMarkovChain/blob/master/LICENSE.txt
 Full license text:
@@ -42,7 +42,7 @@ Full license text:
     * ----------------------------------------------------------------------------
     */
 
-##Tweepy
+## Tweepy
 The python tweepy library was taken from: http://www.tweepy.org/
 It is distributed under the following license: https://github.com/tweepy/tweepy/blob/master/LICENSE
 Full license text:
@@ -67,7 +67,7 @@ Full license text:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 
-##LanguageTool
+## LanguageTool
 The LanguageTool was taken from: https://languagetool.org/
 It is distributed under the following license: https://www.gnu.org/licenses/old-licenses/lgpl-2.1
 Full license text:
@@ -167,20 +167,11 @@ Full license text:
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-    Also add information on how to contact you by electronic and paper mail. 
-    You should also get your employer (if you work as a programmer) or your school, if any, to sign a "copyright disclaimer" for the library, if necessary. Here is a sample; alter the names: 
-    Yoyodyne, Inc., hereby disclaims all copyright interest in
-    the library `Frob' (a library for tweaking knobs) written
-    by James Random Hacker.
-
     signature of Ty Coon, 1 April 1990
     Ty Coon, President of Vice
     That's all there is to it!
 
-##Python
+## Python
 The python programming language is distributed under the following license: https://docs.python.org/3.5/license.html
 Full license text:
     1. This LICENSE AGREEMENT is between the Python Software Foundation ("PSF"), and
@@ -225,7 +216,7 @@ Full license text:
     8. By copying, installing or otherwise using Python 3.5.4, Licensee agrees
     to be bound by the terms and conditions of this License Agreement.
 
-##Java
+## Java
     The Java runtime binaries are distributed under the following license: http://www.oracle.com/technetwork/java/javase/terms/license/index.html
     Full license text:
     Oracle Binary Code License Agreement for the Java SE Platform Products and JavaFX
@@ -292,8 +283,8 @@ Full license text:
 
     Last updated 21 September 2017 
 
-##Text license information
-#Tatoeba 
+## Text license information
+# Tatoeba 
 This project uses a corpus of close to 800000 english sentences, taken from the Tatoeba project: http://downloads.tatoeba.org/exports/sentences.tar.bz2
 These sentences are distributed under the following terms of use: https://tatoeba.org/eng/terms_of_use
 They are distributed under the CC-BY license: https://creativecommons.org/licenses/by/2.0/
