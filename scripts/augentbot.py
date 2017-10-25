@@ -63,7 +63,7 @@ def log_info(entry: str,
     has allowed receiving dms from this account
     """
     if file is None:
-        file = open(os.path.join(DATA, "log.txt"), 'a', encoding='utf-8')
+        file = open(os.path.join(DATA, "log.txt"), 'a', encoding='utf_16')
     
     file.write(timestamps.add_timestamp(entry) + '\n')
     print(entry)
@@ -109,8 +109,8 @@ def process_new_tweets() -> None:
     it is being added more often.
     If a tweet older than 7 days is encountered, the method is being returned.
     """
-    data_file = open(os.path.join(DATA, 'data.txt'), 'a', encoding='utf-8')
-    log_file = open(os.path.join(DATA, 'log.txt'), 'a', encoding='utf-8')
+    data_file = open(os.path.join(DATA, 'data.txt'), 'a', encoding='utf_16')
+    log_file = open(os.path.join(DATA, 'log.txt'), 'a', encoding='utf_16')
     # don't open and close files for every data/logging entry
 
     def process_tweet(tweet):
@@ -140,11 +140,11 @@ def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterabl
         mc = MarkovChain()
 
         # using a corpus of predefined data
-        with open(os.path.join(DATA, "corpus.txt"), encoding='utf-8') as file:
+        with open(os.path.join(DATA, "corpus.txt"), encoding='utf_16') as file:
             corpus_data = file.read()
 
         # adding the collected data from other twitter users
-        with open(os.path.join(DATA, "data.txt"), encoding='utf-8') as file:
+        with open(os.path.join(DATA, "data.txt"), encoding='utf_16') as file:
             collected_data = file.read()
 
         mc.generateDatabase(corpus_data+collected_data, n=5)
@@ -188,17 +188,17 @@ def tweet_new(create_buffers: int = 0) -> None:
     api.update_status(tweets[0])
     
     if create_buffers:
-        with open(os.path.join(DATA, 'buffer.txt'), 'a', encoding='utf-8') as file:
+        with open(os.path.join(DATA, 'buffer.txt'), 'a', encoding='utf_16') as file:
             file.write('\n' + '\n'.join(tweets[1:]))
 
 
 def tweet_from_buffer() -> None:
-    with open(os.path.join(DATA, 'buffer.txt'), encoding='utf-8') as file:
+    with open(os.path.join(DATA, 'buffer.txt'), encoding='utf_16') as file:
         buffer = file.readlines()
 
     api.update_status(buffer.pop())
 
-    with open(os.path.join(DATA, 'buffer.txt'), 'w', encoding='utf-8') as file:
+    with open(os.path.join(DATA, 'buffer.txt'), 'w', encoding='utf_16') as file:
         file.write(''.join(buffer)[:-1])  # remove newline at end of file
 
 
