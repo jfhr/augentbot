@@ -52,8 +52,8 @@ The python programming language is distributed under the [Python License](https:
 The Java runtime binaries are distributed under the [Oracle Binary Code License Agreement for the Java SE Platform Products and JavaFX](http://www.oracle.com/technetwork/java/javase/terms/license/index.html).
 
 
-## Text license information
-# Tatoeba 
+# Text license information
+## Tatoeba 
 This project uses a corpus of close to 800000 english sentences, taken from the Tatoeba project: http://downloads.tatoeba.org/exports/sentences.tar.bz2
 These sentences are distributed under the [terms of use](https://tatoeba.org/eng/terms_of_use).
 They are distributed under the [CC-BY license](https://creativecommons.org/licenses/by/2.0/).
