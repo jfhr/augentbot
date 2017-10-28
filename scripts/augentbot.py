@@ -12,13 +12,13 @@ from pymarkovchain_dynamic import MarkovChain, DynamicMarkovChain
 import timestamps
 import tweet_text
 
-TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials-beta',
                                          'twitter_consumer_key')).read()
-TWITTER_CONSUMER_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_CONSUMER_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials-beta',
                                             'twitter_consumer_secret')).read()
-TWITTER_ACCESS_TOKEN = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_ACCESS_TOKEN = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials-beta',
                                          'twitter_access_token')).read()
-TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials',
+TWITTER_ACCESS_TOKEN_SECRET = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials-beta',
                                                 'twitter_access_token_secret')).read()
 
 HOST_NAME = '_jfde'
