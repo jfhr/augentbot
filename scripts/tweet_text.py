@@ -31,14 +31,14 @@ def get_weight(tweet: tweepy.models.Status) -> int:
 def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
     string = get_plain_text(tweet.text)
 
-    if (not string) or (re.search('[a-zA-Z]', string) is None):
+    if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in IGNORED_USERS):
         return None
     
     return string
 
 
 def get_plain_text(raw_tweet_text: str) -> str:
-    raw_tweet_text = re.sub(r'https{0,1}://t.co/\S+', '', raw_tweet_text)
+    raw_tweet_text = re.sub(r'https?://t.co/\S+', '', raw_tweet_text)
     raw_tweet_text = re.sub(r'http://t.co/\S+', '', raw_tweet_text)
     # remove URLs. Since twitter uses an URL shortener, all URLs look like: "https://t.co/Amn4oTgxkD"
     # except URLs from tweets longer ago, these might still look like "http://t.co/Amn4oTgxkD"
