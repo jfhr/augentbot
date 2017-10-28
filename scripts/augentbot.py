@@ -7,7 +7,7 @@ import platform
 from typing import Optional, Iterable
 
 import tweepy
-from pymarkovchain import MarkovChain
+from pymarkovchain import DynamicMarkovChain
 
 import timestamps
 import tweet_text
@@ -137,7 +137,7 @@ def process_new_tweets() -> None:
 
 def generate_tweets(count: int = 1, mc: Optional[MarkovChain] = None) -> Iterable[str]:
     if mc is None:
-        mc = MarkovChain()
+        mc = DynamicMarkovChain()
 
         # using a corpus of predefined data
         with open(os.path.join(DATA, "corpus.txt"), encoding='utf_16') as file:
