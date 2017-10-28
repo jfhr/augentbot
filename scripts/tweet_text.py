@@ -60,7 +60,9 @@ def get_plain_text(raw_tweet_text: str) -> str:
 
 
 def make_tweet_text(raw_tweet_text: str) -> Union[str, bool]:
-    tweet = grammar_check(get_plain_text(raw_tweet_text))
+    tweet = get_plain_text(raw_tweet_text)
+    if not tweet:
+        return False
     if not tweet[-1] in {'.', '!', '?', ','}:
         tweet += '.'
     if 0 < len(tweet) <= 140:

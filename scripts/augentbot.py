@@ -4,10 +4,10 @@ import _io
 import datetime
 import os
 import platform
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Union
 
 import tweepy
-from pymarkovchain_dynamic import DynamicMarkovChain
+from pymarkovchain_dynamic import MarkovChain, DynamicMarkovChain
 
 import timestamps
 import tweet_text
@@ -135,7 +135,7 @@ def process_new_tweets() -> None:
     return
 
 
-def generate_tweets(count: int = 1, mc: Optional[DynamicMarkovChain] = None) -> Iterable[str]:
+def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovChain] = None) -> Iterable[str]:
     if mc is None:
         mc = DynamicMarkovChain()
 
@@ -148,6 +148,9 @@ def generate_tweets(count: int = 1, mc: Optional[DynamicMarkovChain] = None) -> 
             collected_data = file.read()
 
         mc.generateDatabase(corpus_data+collected_data, n=5)
+
+        del corpus_data
+        del collected_data
 
     tweets = []
     for i in range(count):
@@ -193,6 +196,8 @@ def tweet_new(create_buffers: int = 0) -> None:
 
 
 def tweet_from_buffer() -> None:
+    # DynamicMarkovChain is not finished work yet. For now, there is no other way
+    # than tweeting from the pre-produced buffer
     with open(os.path.join(DATA, 'buffer.txt'), encoding='utf_16') as file:
         buffer = file.readlines()
 
@@ -206,7 +211,8 @@ def run(create_buffers: int = 0) -> None:
     try:
         followback()
         process_new_tweets()
-        tweet_new(create_buffers)
+        # tweet_new(create_buffers)
+        tweet_from_buffer()
     except Exception as e:
         log_info(str(e), notify=True)
         try:
@@ -219,5 +225,4 @@ if __name__ == '__main__':
     if platform.system() == 'Windows':
         os.system('chcp 65001')  # fixes encoding errors on windows
 
-    if confirm('Run now'):
-        run()
+    generate_tweets()
