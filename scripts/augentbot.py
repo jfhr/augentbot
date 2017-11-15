@@ -134,7 +134,7 @@ def process_new_tweets() -> None:
 
 def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovChain] = None) -> Iterable[str]:
     if mc is None:
-        mc = DynamicMarkovChain()
+        mc = MarkovChain()
 
         # using a corpus of predefined data
         with open(os.path.join(DATA, "corpus.txt"), encoding='utf_16') as file:
@@ -144,7 +144,7 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
         with open(os.path.join(DATA, "data.txt"), encoding='utf_16') as file:
             collected_data = file.read()
 
-        mc.generateDatabase(corpus_data+collected_data, n=5)
+        mc.generateDatabase(corpus_data+collected_data, n=4)
 
         del corpus_data
         del collected_data
@@ -208,8 +208,7 @@ def run(create_buffers: int = 0) -> None:
     try:
         followback()
         process_new_tweets()
-        # tweet_new(create_buffers)
-        tweet_from_buffer()
+        tweet_new(create_buffers)
     except Exception as e:
         log_info(str(e), notify=True)
         try:
