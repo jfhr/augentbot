@@ -211,8 +211,7 @@ def run(create_buffers: int = 0) -> None:
     try:
         followback()
         process_new_tweets()
-        # tweet_new(create_buffers)
-        tweet_from_buffer()
+        tweet_new(create_buffers)
     except Exception as e:
         log_info(str(e), notify=True)
         try:
