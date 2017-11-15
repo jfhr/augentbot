@@ -137,7 +137,7 @@ def process_new_tweets() -> None:
 
 def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovChain] = None) -> Iterable[str]:
     if mc is None:
-        mc = DynamicMarkovChain()
+        mc = MarkovChain()
 
         # using a corpus of predefined data
         with open(os.path.join(DATA, "corpus.txt"), encoding='utf_16') as file:
@@ -147,7 +147,7 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
         with open(os.path.join(DATA, "data.txt"), encoding='utf_16') as file:
             collected_data = file.read()
 
-        mc.generateDatabase(corpus_data+collected_data, n=5)
+        mc.generateDatabase(corpus_data+collected_data, n=4)
 
         del corpus_data
         del collected_data
@@ -166,7 +166,7 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
 
 """
 Information on buffer:
-In The augentbot data directory lives a file buffer.txt, which contains pre-produced tweets. In case the full augentbot
+In the augentbot data directory lives a file buffer.txt, which contains pre-produced tweets. In case the full augentbot
 code throws an exception, a tweet from that file is being tweeted to ensure the bot still keeps tweeting. When producing
 a new tweet, one can choose to simultaneously add any number of tweets, produced from the same database, to the 
 buffer.txt file, so it always contains a solid amount of tweets.
