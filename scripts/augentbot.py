@@ -136,7 +136,9 @@ def process_new_tweets() -> None:
 
 
 def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovChain] = None) -> Iterable[str]:
+    temporary_markov_chain = False
     if mc is None:
+        temporary_markov_chain = True
         mc = MarkovChain()
 
         # using a corpus of predefined data
@@ -160,6 +162,9 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
                 log_info("Added tweet '{}'".format(tweet))
                 tweets.append(tweet)
                 break
+    
+    if temporary_markov_chain:
+        del mc
 
     return tweets
 
