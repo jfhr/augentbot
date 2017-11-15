@@ -1,16 +1,15 @@
 #! python3
 
 import _io
-import datetime
 import os
 import platform
 from typing import Optional, Iterable, Union
 
 import tweepy
-from pymarkovchain_dynamic import MarkovChain, DynamicMarkovChain
 
 import timestamps
 import tweet_text
+from pymarkovchain_dynamic import MarkovChain, DynamicMarkovChain
 
 TWITTER_CONSUMER_KEY = open(os.path.join(os.path.expanduser('~'), 'augentbot', 'credentials-beta',
                                          'twitter_consumer_key')).read()
@@ -125,11 +124,9 @@ def process_new_tweets() -> None:
                      .format(tweet.author.screen_name, tweet.text), file=log_file, close_file=False)
 
     for t in tweepy.Cursor(api.user_timeline, count=168).items():
-        if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
-            data_file.close()
-            log_file.close()
-            return
-        process_tweet(t)
+        t.text = tweet_text.grammar_check(t.text)
+        if t.text:
+            process_tweet(t)
     data_file.close()
     log_file.close()
     return
