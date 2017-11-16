@@ -29,12 +29,12 @@ def get_weight(tweet: tweepy.models.Status) -> int:
 
 
 def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
-    string = get_plain_text(tweet.text)
+    tweet_string = get_plain_text(tweet.text)
 
-    if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in IGNORED_USERS):
-        return None
+    if (not tweet_string) or (re.search('[a-zA-Z]', tweet_string) is None) or (tweet.author in IGNORED_USERS):
+        return False
     
-    return string
+    return tweet_string
 
 
 def get_plain_text(raw_tweet_text: str) -> str:

@@ -123,9 +123,7 @@ def process_new_tweets() -> None:
             log_info("Processing tweet {0}: '{1}' ... not viable"
                      .format(tweet.author.screen_name, tweet.text), file=log_file, close_file=False)
 
-    for t in tweepy.Cursor(api.user_timeline, count=168).items():
-        t.text = tweet_text.grammar_check(t.text)
-        if t.text:
+    for t in tweepy.Cursor(api.home_timeline, count=240).items():
             process_tweet(t)
     data_file.close()
     log_file.close()
