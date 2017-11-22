@@ -84,12 +84,8 @@ def process_new_tweets() -> None:
 
     for t in augent_constants.tweepy.Cursor(augent_constants.api.user_timeline, count=168).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
-            augent_constants.data_file.close()
-            augent_constants.log_file.close()
             return
         process_tweet(t)
-    augent_constants.data_file.close()
-    augent_constants.log_file.close()
     return
 
 
