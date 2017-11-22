@@ -82,7 +82,7 @@ def process_new_tweets() -> None:
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable".format(tweet.author.screen_name, tweet.text))
 
-    for t in augent_constants.tweepy.Cursor(augent_constants.api.user_timeline, count=168).items():
+    for t in augent_constants.tweepy.Cursor(augent_constants.api.home_timeline, count=168).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             return
         process_tweet(t)
@@ -106,7 +106,7 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
                 log_info("Added tweet '{}'".format(tweet))
                 tweets.append(tweet)
                 break
-    
+
     if temporary_markov_chain:
         del mc
 
