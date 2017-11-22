@@ -43,10 +43,10 @@ def read_coll():
 def read_corpus():
     global corpus_data
     with open(usr('~/augentbot/data/log.txt'), 'r', encoding='utf_16') as file:
-        corpus_data: str = file.read()
+        corpus_data = file.read()
 
 
 def read_buffer():
     global buffer_data
     with open(usr('~/augentbot/data/buffer.txt'), encoding='utf-16') as file:
-        buffer_data: List[str] = file.readlines()
+        buffer_data = file.readlines()
