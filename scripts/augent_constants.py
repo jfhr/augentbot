@@ -31,7 +31,7 @@ buffer_file: _io.TextIOWrapper = open(usr('~/augentbot/data/buffer.txt'), 'a', e
 
 coll_data: str = ''
 corpus_data: str = ''
-buffer_data: str = ''
+buffer_data: List[str] = ['', ]
 
 
 def read_coll():
