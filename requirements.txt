@@ -4,4 +4,4 @@ tweepy
 language-check
 nltk
 # Also requires Java runtime environment for the language checking.
-# Tests shown it works with Java 8, but not Java 9.
+# Tests show it works with Java 8, but not Java 9.

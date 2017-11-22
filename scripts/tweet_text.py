@@ -5,11 +5,10 @@ from math import sqrt
 from typing import Union, Optional
 
 import language_check
-import tweepy
 
-IGNORED_USERS = []
+import augent_constants
 
-lt = language_check.LanguageTool('en-US')
+lt: language_check.LanguageTool = language_check.LanguageTool('en-US')
 
 
 def grammar_check(text: str) -> Union[str, bool]:
@@ -19,7 +18,7 @@ def grammar_check(text: str) -> Union[str, bool]:
     return text
 
 
-def get_weight(tweet: tweepy.models.Status) -> int:
+def get_weight(tweet) -> int:
     precise_weight = int((tweet.retweet_count*5 + tweet.favorite_count)/sqrt(tweet.author.followers_count))
     limited_weight = min(precise_weight, 20)
     # limit the weight of a single tweet to 20 \
@@ -28,13 +27,13 @@ def get_weight(tweet: tweepy.models.Status) -> int:
     return limited_weight
 
 
-def get_viable_text(tweet: tweepy.models.Status) -> Optional[str]:
-    tweet_string = get_plain_text(tweet.text)
+def get_viable_text(tweet) -> Optional[str]:
+    string = get_plain_text(tweet.text)
 
-    if (not tweet_string) or (re.search('[a-zA-Z]', tweet_string) is None) or (tweet.author in IGNORED_USERS):
-        return False
+    if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in augent_constants.IGNORED_USERS):
+        return None
     
-    return tweet_string
+    return string
 
 
 def get_plain_text(raw_tweet_text: str) -> str:
