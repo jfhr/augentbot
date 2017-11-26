@@ -30,7 +30,8 @@ def log_info(entry: str, notify: bool = False) -> None:
     user specified as HOST_NAME via twitter dm. This requires that the user
     has allowed receiving dms from this account
     """
-    augent_constants.log_file.write(timestamps.add_timestamp(entry) + '\n')
+    entry = timestamps.add_timestamp(entry)
+    augent_constants.log_file.write(entry + '\n')
     print(entry)
     if notify:
         notify_me(entry)
