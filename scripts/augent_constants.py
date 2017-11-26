@@ -16,6 +16,7 @@ with open(usr('~/augentbot-beta/credentials/twitter_access_token_secret')) as fi
     TWITTER_ACCESS_SECRET: str = file.read()
 
 HOST_NAME: str = '_jfde'
+BOT_NAME: str = 'augentbot'
 
 auth: tweepy.OAuthHandler = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET)
@@ -42,7 +43,7 @@ def read_coll():
 
 def read_corpus():
     global corpus_data
-    with open(usr('~/augentbot-beta/data/log.txt'), 'r', encoding='utf_16') as file:
+    with open(usr('~/augentbot-beta/data/corpus.txt'), 'r', encoding='utf_16') as file:
         corpus_data = file.read()
 
 
