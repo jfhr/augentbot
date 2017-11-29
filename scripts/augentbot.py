@@ -2,11 +2,11 @@
 
 import datetime
 import platform
-from typing import List, Union
+from typing import Union
 
-import augent_constants
 import timestamps
 import tweet_text
+from constants import *
 from pymarkovchain_dynamic import MarkovChain, DynamicMarkovChain
 
 
@@ -17,8 +17,8 @@ def notify_me(text: str) -> None:
     """
     for subtext in [text[i:i + 10000] for i in range(0, len(text), 10000)]:
         try:
-            augent_constants.api.send_direct_message(screen_name=augent_constants.HOST_NAME, text=subtext)
-        except augent_constants.tweepy.TweepError as e:
+            api.send_direct_message(screen_name=HOST_NAME, text=subtext)
+        except tweepy.TweepError as e:
             log_info("{0} when trying to send the following dm:\n    '{1}'".format(e, text))
 
 
@@ -30,42 +30,39 @@ def log_info(entry: str, notify: bool = False) -> None:
     user specified as HOST_NAME via twitter dm. This requires that the user
     has allowed receiving dms from this account
     """
-    entry = timestamps.add_timestamp(entry)
-    augent_constants.log_file.write(entry + '\n')
+    log_file.write(timestamps.add_timestamp(entry) + '\n')
     print(entry)
     if notify:
         notify_me(entry)
 
 
 def followback() -> None:
-    followers: List = [follower.screen_name for follower in
-                       augent_constants.tweepy.Cursor(augent_constants.api.followers,
-                                                      screen_name=augent_constants.BOT_NAME).items()]
+    followers = [follower.screen_name for follower in
+                 tweepy.Cursor(api.followers).items()]
     # follow back
-    followings: List = [following.screen_name for following in
-                        augent_constants.tweepy.Cursor(augent_constants.api.friends,
-                                                       screen_name=augent_constants.BOT_NAME).items()]
+    followings = [following.screen_name for following in
+                  tweepy.Cursor(api.friends).items()]
     for follower in followers:
-        if follower not in followings + augent_constants.IGNORED_USERS:
+        if follower not in followings + IGNORED_USERS:
             try:
-                augent_constants.api.create_friendship(follower)
+                api.create_friendship(follower)
                 log_info('followed @{0}'.format(follower))
-            except augent_constants.tweepy.RateLimitError:
+            except tweepy.RateLimitError:
                 log_info('Rate limit exceeded.', True)
                 break
-            except augent_constants.tweepy.TweepError:
+            except tweepy.TweepError:
                 log_info("Couldn't follow @{0}".format(follower))
 
     # unfollow back
     for following in followings:
-        if following not in followers + augent_constants.IGNORED_USERS:
+        if following not in followers + IGNORED_USERS:
             try:
-                augent_constants.api.destroy_friendship(following)
+                api.destroy_friendship(following)
                 log_info('unfollowed @{0}'.format(following))
-            except augent_constants.tweepy.RateLimitError:
+            except tweepy.RateLimitError:
                 log_info('Rate limit exceeded.', True)
                 break
-            except augent_constants.tweepy.TweepError:
+            except tweepy.TweepError:
                 log_info("Couldn't follow @{0}".format(following))
 
 
@@ -82,11 +79,11 @@ def process_new_tweets() -> None:
         if tweet_value:
             log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value))
             for i in range(tweet_text.get_weight(tweet)):
-                augent_constants.data_file.write(tweet_value)
+                data_file.write(tweet_value)
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable".format(tweet.author.screen_name, tweet.text))
 
-    for t in augent_constants.tweepy.Cursor(augent_constants.api.home_timeline, count=168).items():
+    for t in tweepy.Cursor(api.home_timeline, count=168).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             return
         process_tweet(t)
@@ -96,13 +93,13 @@ def process_new_tweets() -> None:
 def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovChain] = None) -> List[str]:
     temporary_markov_chain = False
     if mc is None:
-        augent_constants.read_coll()
-        augent_constants.read_corpus()
+        read_coll()
+        read_corpus()
         temporary_markov_chain = True
         mc: MarkovChain = MarkovChain()
-        mc.generateDatabase(augent_constants.corpus_data + augent_constants.coll_data, n=4)
+        mc.generateDatabase(corpus_data + coll_data, n=4)
 
-    tweets: augent_constants.List[str] = []
+    tweets: List[str] = []
     for i in range(count):
         while True:
             tweet = tweet_text.make_tweet_text(mc.generateString())
@@ -141,16 +138,16 @@ def tweet_new(create_buffers: int = 0) -> None:
             tweets.append(t_text)
             # create a tweet and, if specified in function call, create additional tweets for the tweet buffer
 
-    augent_constants.api.update_status(tweets[0])
-
+    api.update_status(tweets[0])
+    
     if create_buffers:
-        augent_constants.buffer_file.write('\n' + '\n'.join(tweets[1:]))
+        buffer_file.write('\n' + '\n'.join(tweets[1:]))
 
 
 def tweet_from_buffer() -> None:
-    augent_constants.read_buffer()
-    augent_constants.api.update_status(augent_constants.buffer_data.pop())
-    augent_constants.buffer_file.write(''.join(augent_constants.buffer_data)[:-1])  # remove newline at end of file
+    read_buffer()
+    api.update_status(buffer_data.pop())
+    buffer_file.write(''.join(buffer_data)[:-1])  # remove newline at end of file
 
 
 def run(create_buffers: int = 0) -> None:
