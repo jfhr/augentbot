@@ -6,7 +6,7 @@ from typing import Union, Optional
 
 import language_check
 
-import augent_constants
+import constants
 
 lt: language_check.LanguageTool = language_check.LanguageTool('en-US')
 
@@ -30,7 +30,7 @@ def get_weight(tweet) -> int:
 def get_viable_text(tweet) -> Optional[str]:
     string = get_plain_text(tweet.text)
 
-    if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in augent_constants.IGNORED_USERS):
+    if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in constants.IGNORED_USERS):
         return None
     
     return string
