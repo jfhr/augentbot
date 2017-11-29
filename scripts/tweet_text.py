@@ -32,7 +32,7 @@ def get_viable_text(tweet) -> Optional[str]:
 
     if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in constants.IGNORED_USERS):
         return None
-    
+
     return string
 
 

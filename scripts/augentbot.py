@@ -15,7 +15,7 @@ def notify_me(text: str) -> None:
     send a message to the user specified as HOST_NAME. Messages longer than 10000
     characters will be split in sub-messages due to twitter limits
     """
-    for subtext in [text[i:i+10000] for i in range(0, len(text), 10000)]:
+    for subtext in [text[i:i + 10000] for i in range(0, len(text), 10000)]:
         try:
             api.send_direct_message(screen_name=HOST_NAME, text=subtext)
         except tweepy.TweepError as e:
@@ -73,6 +73,7 @@ def process_new_tweets() -> None:
     it is being added more often.
     If a tweet older than 7 days is encountered, the method is being returned.
     """
+
     def process_tweet(tweet):
         tweet_value = tweet_text.get_viable_text(tweet)
         if tweet_value:
@@ -106,7 +107,7 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
                 log_info("Added tweet '{}'".format(tweet))
                 tweets.append(tweet)
                 break
-    
+
     if temporary_markov_chain:
         del mc
 
@@ -131,7 +132,7 @@ except Exception as e:
 
 def tweet_new(create_buffers: int = 0) -> None:
     tweets = list()
-    for t in generate_tweets(count=1+create_buffers):
+    for t in generate_tweets(count=1 + create_buffers):
         t_text = tweet_text.make_tweet_text(t)
         if t_text:
             tweets.append(t_text)
@@ -172,6 +173,7 @@ def run(create_buffers: int = 0) -> None:
 
 if __name__ == '__main__':
     import os
+
     if platform.system() == 'Windows':
         os.system('chcp 65001')  # fixes encoding errors on windows
 
