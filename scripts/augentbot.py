@@ -93,11 +93,9 @@ def process_new_tweets() -> None:
 def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovChain] = None) -> List[str]:
     temporary_markov_chain = False
     if mc is None:
-        read_coll()
-        read_corpus()
         temporary_markov_chain = True
         mc: MarkovChain = MarkovChain()
-        mc.generateDatabase(corpus_data + coll_data, n=4)
+        mc.generateDatabase(read_corpus() + read_coll(), n=4)
 
     tweets: List[str] = []
     for i in range(count):
@@ -145,7 +143,7 @@ def tweet_new(create_buffers: int = 0) -> None:
 
 
 def tweet_from_buffer() -> None:
-    read_buffer()
+    buffer_data: List[str] = read_buffer()
     api.update_status(buffer_data.pop())
     buffer_file.write(''.join(buffer_data)[:-1])  # remove newline at end of file
 
@@ -174,7 +172,7 @@ def run(create_buffers: int = 0) -> None:
 if __name__ == '__main__':
     import os
 
-    if platform.system() == 'Windows':
-        os.system('chcp 65001')  # fixes encoding errors on windows
+    # if platform.system() == 'Windows':
+    #     os.system('chcp 65001')  # fixes encoding errors on windows
 
     generate_tweets()
