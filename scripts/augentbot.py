@@ -83,7 +83,7 @@ def process_new_tweets() -> None:
         else:
             log_info("Processing tweet {0}: '{1}' ... not viable".format(tweet.author.screen_name, tweet.text))
 
-    for t in tweepy.Cursor(api.user_timeline, count=168).items():
+    for t in tweepy.Cursor(api.home_timeline, count=168).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             return
         process_tweet(t)
