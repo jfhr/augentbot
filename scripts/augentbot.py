@@ -95,7 +95,7 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
     if mc is None:
         temporary_markov_chain = True
         mc: MarkovChain = MarkovChain()
-        mc.generateDatabase(read_corpus() + read_coll(), n=4)
+        mc.generateDatabase(read_corpus() + read_coll(), n=4, sentenceSep='[….!?\n]')
 
     tweets: List[str] = []
     for i in range(count):
