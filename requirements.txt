@@ -1,7 +1,7 @@
-schedule
-PyMarkovChain
-tweepy
-language-check
-nltk
+schedule==0.5.0
+PyMarkovChain==1.8
+tweepy==3.5.0
+language-check==1.1
+nltk==3.2.5
 # Also requires Java runtime environment for the language checking.
-# Tests show it works with Java 8, but not Java 9.
+# Tests worked with Java 8, but not Java 9.

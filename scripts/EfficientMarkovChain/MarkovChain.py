@@ -10,19 +10,24 @@ import random
 import re
 from collections import defaultdict
 
+
 class StringContinuationImpossibleError(Exception):
     pass
+
 
 # {words: {word: prob}}
 # We have to define these as separate functions so they can be pickled.
 def _db_factory():
     return defaultdict(_one_dict)
 
+
 def _one():
     return 1.0
 
+
 def _one_dict():
     return defaultdict(_one)
+
 
 def _wordIter(text, separator='.'):
     """
@@ -42,6 +47,7 @@ def _wordIter(text, separator='.'):
         if sub:
             yield sub
 
+
 class MarkovChain(object):
     def __init__(self, dbFilePath=None):
         self.dbFilePath = dbFilePath
@@ -51,7 +57,7 @@ class MarkovChain(object):
             with open(self.dbFilePath, 'rb') as dbfile:
                 self.db = pickle.load(dbfile)
         except (IOError, ValueError):
-            logging.warn('Database file corrupt or not found, using empty database')
+            logger.warning('Database file corrupt or not found, using empty database')
             self.db = _db_factory()
 
     def generateDatabase(self, textSample, sentenceSep='[.!?\n]', n=2):
@@ -95,7 +101,7 @@ class MarkovChain(object):
             # It looks like db was written successfully
             return True
         except IOError:
-            logging.warn('Database file could not be written')
+            logger.warn('Database file could not be written')
             return False
 
     def generateString(self):

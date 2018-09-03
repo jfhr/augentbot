@@ -1,39 +1,31 @@
 #! python3.6
 
 import datetime
-import platform
 from typing import Union
 
-import timestamps
-import tweet_text
-from constants import *
-from pymarkovchain_dynamic import MarkovChain, DynamicMarkovChain
+import tweepy
+
+from .logging import get_logger
+from .config import *
+from .tweet_text import *
+from .tweet_buffer import *
+
+from .EfficientMarkovChain import MarkovChain
 
 
-def notify_me(text: str) -> None:
-    """
-    send a message to the user specified as HOST_NAME. Messages longer than 10000
-    characters will be split in sub-messages due to twitter limits
-    """
-    for subtext in [text[i:i + 10000] for i in range(0, len(text), 10000)]:
-        try:
-            api.send_direct_message(screen_name=HOST_NAME, text=subtext)
-        except tweepy.TweepError as e:
-            log_info("{0} when trying to send the following dm:\n    '{1}'".format(e, text))
+api: tweepy.API
+logger: logger.Logger
 
 
-def log_info(entry: str, notify: bool = False) -> None:
-    """
-    Attaches a timestamp with the current time to the entry,
-    prints the entry and saves it in the log.txt file of the data directory.
-    It notify is true, the entry with the add_timestamp will be sent to the
-    user specified as HOST_NAME via twitter dm. This requires that the user
-    has allowed receiving dms from this account
-    """
-    log_file.write(timestamps.add_timestamp(entry) + '\n')
-    print(entry)
-    if notify:
-        notify_me(entry)
+def initialize():
+    global api, logger
+    auth: tweepy.OAuthHandler = tweepy.OAuthHandler(CREDENTIALS['CONSUMER_KEY'], CREDENTIALS['CONSUMER_SECRET'])
+    auth.set_access_token(CREDENTIALS['ACCESS_TOKEN'], CREDENTIALS['ACCESS_SECRET'])
+
+    api = tweepy.API(auth)
+    
+    # get a logger that can send twitter dms to HOST_NAME for all important events
+    logger = get_logger(api)
 
 
 def followback() -> None:
@@ -46,24 +38,34 @@ def followback() -> None:
         if follower not in followings + IGNORED_USERS:
             try:
                 api.create_friendship(follower)
-                log_info('followed @{0}'.format(follower))
+                logger.info('followed @{0}'.format(follower))
             except tweepy.RateLimitError:
-                log_info('Rate limit exceeded.', True)
+                logger.info('Rate limit exceeded.', True)
                 break
             except tweepy.TweepError:
-                log_info("Couldn't follow @{0}".format(follower))
+                logger.info("Couldn't follow @{0}".format(follower))
 
     # unfollow back
     for following in followings:
         if following not in followers + IGNORED_USERS:
             try:
                 api.destroy_friendship(following)
-                log_info('unfollowed @{0}'.format(following))
+                logger.info('unfollowed @{0}'.format(following))
             except tweepy.RateLimitError:
-                log_info('Rate limit exceeded.', True)
+                logger.info('Rate limit exceeded.', True)
                 break
             except tweepy.TweepError:
-                log_info("Couldn't follow @{0}".format(following))
+                logger.info("Couldn't follow @{0}".format(following))
+
+
+def process_tweet(tweet):
+    tweet_value = get_viable_text(tweet)
+    if tweet_value:
+        logger.info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value))
+        for i in range(get_weight(tweet)):
+            data_file.write(tweet_value)
+    else:
+        logger.info("Processing tweet {0}: '{1}' ... not viable".format(tweet.author.screen_name, tweet.text))
 
 
 def process_new_tweets() -> None:
@@ -74,15 +76,6 @@ def process_new_tweets() -> None:
     If a tweet older than 7 days is encountered, the method is being returned.
     """
 
-    def process_tweet(tweet):
-        tweet_value = tweet_text.get_viable_text(tweet)
-        if tweet_value:
-            log_info("Processing tweet {0}: '{1}' ... viable".format(tweet.author.screen_name, tweet_value))
-            for i in range(tweet_text.get_weight(tweet)):
-                data_file.write(tweet_value)
-        else:
-            log_info("Processing tweet {0}: '{1}' ... not viable".format(tweet.author.screen_name, tweet.text))
-
     for t in tweepy.Cursor(api.home_timeline, count=168).items():
         if t.created_at < datetime.datetime.now() - datetime.timedelta(days=7):
             return
@@ -90,7 +83,7 @@ def process_new_tweets() -> None:
     return
 
 
-def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovChain] = None) -> List[str]:
+def generate_tweets(count: int = 1, mc: Union[None, MarkovChain] = None) -> List[str]:
     temporary_markov_chain = False
     if mc is None:
         temporary_markov_chain = True
@@ -100,9 +93,9 @@ def generate_tweets(count: int = 1, mc: Union[None, MarkovChain, DynamicMarkovCh
     tweets: List[str] = []
     for i in range(count):
         while True:
-            tweet = tweet_text.make_tweet_text(mc.generateString())
+            tweet = make_tweet_text(mc.generateString())
             if tweet:
-                log_info("Added tweet '{}'".format(tweet))
+                logger.info("Added tweet '{}'".format(tweet))
                 tweets.append(tweet)
                 break
 
@@ -131,15 +124,15 @@ except Exception as e:
 def tweet_new(create_buffers: int = 0) -> None:
     tweets = list()
     for t in generate_tweets(count=1 + create_buffers):
-        t_text = tweet_text.make_tweet_text(t)
+        t_text = make_tweet_text(t)
         if t_text:
             tweets.append(t_text)
             # create a tweet and, if specified in function call, create additional tweets for the tweet buffer
 
     api.update_status(tweets[0])
     
-    if create_buffers:
-        buffer_file.write('\n' + '\n'.join(tweets[1:]))
+    if create_buffers > 0:
+        append_tweets_to_buffer(*tweets[1:])
 
 
 def tweet_from_buffer() -> None:
@@ -152,26 +145,26 @@ def run(create_buffers: int = 0) -> None:
     try:
         followback()
     except Exception as e:
-        log_info(str(e), notify=True)
+        logger.info(str(e), notify=True)
 
     try:
         process_new_tweets()
     except Exception as e:
-        log_info(str(e), notify=True)
+        logger.info(str(e), notify=True)
 
     try:
         tweet_new(create_buffers)
     except Exception as e:
-        log_info(str(e), notify=True)
+        logger.info(str(e), notify=True)
         try:
             tweet_from_buffer()
         except Exception as e:
-            log_info('{} in buffer'.format(str(e)), notify=True)
+            logger.info('{} in buffer'.format(str(e)), notify=True)
 
 
 if __name__ == '__main__':
-    import os
-
+    # import os
+    #
     # if platform.system() == 'Windows':
     #     os.system('chcp 65001')  # fixes encoding errors on windows
 

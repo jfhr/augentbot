@@ -5,8 +5,9 @@ from math import sqrt
 from typing import Union, Optional
 
 import language_check
+from .config import *
 
-import constants
+__all__ = ['grammar_check', 'get_weight', 'get_viable_text', 'get_plain_text']
 
 lt: language_check.LanguageTool = language_check.LanguageTool('en-US')
 
@@ -30,7 +31,7 @@ def get_weight(tweet) -> int:
 def get_viable_text(tweet) -> Optional[str]:
     string = get_plain_text(tweet.text)
 
-    if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in constants.IGNORED_USERS):
+    if (not string) or (re.search('[a-zA-Z]', string) is None) or (tweet.author in IGNORED_USERS):
         return None
 
     return string
@@ -43,7 +44,7 @@ def get_plain_text(raw_tweet_text: str) -> str:
     # except URLs from tweets longer ago, these might still look like "http://t.co/Amn4oTgxkD"
 
     raw_tweet_text = re.sub(r'.?@\w+[: ]', '', raw_tweet_text)
-    # remove mentions. Mentions look like "@_jfde" or "@_jfde:"
+    # remove mentions. Mentions look like "@_jfde " or "@_jfde:"
 
     raw_tweet_text = re.sub(r'^RT', '', raw_tweet_text)
     # remove retweet identifiers. Retweets in plain text look like: "RT @_jfde: Original tweet text"
@@ -71,5 +72,4 @@ def make_tweet_text(raw_tweet_text: str) -> Union[str, bool]:
 
 
 if __name__ == '__main__':
-    # run tests
-    print(get_plain_text(r"@123 https://t.co/f3g Definitely important infomration! @_12jfde   \n "))
+    print(get_plain_text(r"@123 https://t.co/f3g Definitely important infomration! @_jfde   \n "))
